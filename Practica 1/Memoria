@@ -1,0 +1,9 @@
+Buscando en la referencia del enunciado de la práctica en escobol.es, hay un enlace de descarga que no funciona, así que buscando compiladores actuales para ejecutar código COBOL se ha encontrado GNUCobol, un compilador multiplataforma que tras probarlo ha dado resultado.
+
+La primera experiencia ha sido bastante frustrante porque no compilaba absolutamente ningún fichero, pero cambiando casi siempre la misma instruccion 'DISPLAY' en todos los ficheros se ha conseguido que no salgan más errores durante la compilación referente a esa instrucción. En algunos casos, la longitud de la cadena a mostrar era el problema.
+
+Tambien se ha tenido que añadir al final de los ficheros la instrucción 'END PROGRAM BANKx.' y una nueva linea luego para que no salieran errores.
+
+En la línea 116 del fichero BANK6 se ha tenido que añadir un signo negativo a la posición del pixel sobre el que se dibuja. La solución estaba en internet en los primeros resultados de búsqueda, y lo explican algo así como que al ser una referencia hay que poner el valor en negativo.
+
+Con esos cambios los ficheros ya funcionan y se puede generar el ejecutable.
