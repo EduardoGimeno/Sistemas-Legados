@@ -8,7 +8,7 @@
 
        INPUT-OUTPUT SECTION.
        FILE-CONTROL.
-           SELECT F-MOVIMIENTOS ASSIGN TO DISK
+           SELECT F-MOVIMIENTOS ASSIGN TO "movimientos.ubd"
            ORGANIZATION IS INDEXED
            ACCESS MODE IS DYNAMIC
            RECORD KEY IS MOV-NUM
@@ -17,9 +17,7 @@
 
        DATA DIVISION.
        FILE SECTION.
-       FD F-MOVIMIENTOS
-           LABEL RECORD STANDARD
-           VALUE OF FILE-ID IS "movimientos.ubd".
+       FD F-MOVIMIENTOS.
        01 MOVIMIENTO-REG.
            02 MOV-NUM               PIC  9(35).
            02 MOV-TARJETA           PIC  9(16).
@@ -240,6 +238,17 @@
 
        PCONSULTA-MOV.
 
+           OPEN INPUT F-MOVIMIENTOS.
+           IF FSM = 35
+               OPEN OUTPUT F-MOVIMIENTOS
+               IF FSM = 0
+                   GO TO PCONSULTA-MOV
+               ELSE
+                   GO TO PCONSULTA-MOV
+           ELSE
+               IF FSM <> 00
+                   GO TO PSYS-ERR.
+
            INITIALIZE DIA1-USUARIO.
            INITIALIZE MES1-USUARIO.
            INITIALIZE ANO1-USUARIO.
@@ -287,10 +296,6 @@
                            MOVE 99        TO EURDEC1-USUARIO.
 
            PERFORM IMPRIMIR-CABECERA THRU IMPRIMIR-CABECERA.
-
-           OPEN INPUT F-MOVIMIENTOS.
-               IF FSM <> 30
-                   GO TO PSYS-ERR.
 
        POSICIONAR-FINAL.
            READ F-MOVIMIENTOS NEXT RECORD AT END GO PLECTURA-MOV.

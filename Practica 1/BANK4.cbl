@@ -8,7 +8,7 @@
 
        INPUT-OUTPUT SECTION.
        FILE-CONTROL.
-           SELECT F-MOVIMIENTOS ASSIGN TO DISK
+           SELECT F-MOVIMIENTOS ASSIGN TO "movimientos.ubd"
            ORGANIZATION IS INDEXED
            ACCESS MODE IS DYNAMIC
            RECORD KEY IS MOV-NUM
@@ -17,9 +17,7 @@
 
        DATA DIVISION.
        FILE SECTION.
-       FD F-MOVIMIENTOS
-           LABEL RECORD STANDARD
-           VALUE OF FILE-ID IS "movimientos.ubd".
+       FD F-MOVIMIENTOS.
        01 MOVIMIENTO-REG.
            02 MOV-NUM               PIC  9(35).
            02 MOV-TARJETA           PIC  9(16).
@@ -138,10 +136,17 @@
 
 
 
-       CONSULTA-ULTIMO-MOVIMIENTO SECTION.
-           OPEN I-O F-MOVIMIENTOS.
-           IF FSM <> 30
-              GO TO PSYS-ERR.
+       CONSULTA-ULTIMO-MOVIMIENTO.
+           OPEN INPUT F-MOVIMIENTOS.
+           IF FSM = 35
+               OPEN OUTPUT F-MOVIMIENTOS
+               IF FSM = 0
+                   GO TO CONSULTA-ULTIMO-MOVIMIENTO
+               ELSE
+                   GO TO CONSULTA-ULTIMO-MOVIMIENTO
+           ELSE
+               IF FSM <> 00
+                   GO TO PSYS-ERR.
 
            MOVE 0 TO LAST-MOV-NUM.
 
@@ -161,7 +166,7 @@
 
        CONSULTA-SALDO-USUARIO SECTION.
            OPEN INPUT F-MOVIMIENTOS.
-           IF FSM <> 30
+           IF FSM <> 00
                GO TO PSYS-ERR.
 
            MOVE 0 TO LAST-USER-MOV-NUM.
@@ -190,7 +195,7 @@
            MOVE LAST-USER-MOV-NUM TO MOV-NUM.
 
            OPEN INPUT F-MOVIMIENTOS.
-           IF FSM <> 30
+           IF FSM <> 00
                GO TO PSYS-ERR.
 
            READ F-MOVIMIENTOS INVALID KEY GO TO PSYS-ERR.
@@ -243,7 +248,7 @@
        INSERTAR-MOVIMIENTO SECTION.
 
            OPEN I-O F-MOVIMIENTOS.
-           IF FSM <> 30
+           IF FSM <> 00
               GO TO PSYS-ERR.
 
            SUBTRACT CENT-IMPOR-USER FROM CENT-SALDO-USER.

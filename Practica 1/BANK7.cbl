@@ -8,7 +8,7 @@
 
        INPUT-OUTPUT SECTION.
        FILE-CONTROL.
-           SELECT F-MOVIMIENTOS ASSIGN TO DISK
+           SELECT F-MOVIMIENTOS ASSIGN TO "movimientos.ubd"
            ORGANIZATION IS INDEXED
            ACCESS MODE IS DYNAMIC
            RECORD KEY IS MOV-NUM
@@ -23,9 +23,7 @@
 
        DATA DIVISION.
        FILE SECTION.
-       FD F-MOVIMIENTOS
-           LABEL RECORD STANDARD
-           VALUE OF FILE-ID IS "movimientos.ubd".
+       FD F-MOVIMIENTOS.
        01 MOVIMIENTO-REG.
            02 MOV-NUM               PIC  9(35).
            02 MOV-TARJETA           PIC  9(16).
@@ -260,9 +258,16 @@
            DISPLAY "Compra de entradas de espectaculos" LINE 6 COL 22.
 
        CONSULTA-SALDO.
-           OPEN I-O F-MOVIMIENTOS.
-           IF FSM <> 30
-               GO TO PSYS-ERR.
+           OPEN INPUT F-MOVIMIENTOS.
+           IF FSM = 35
+               OPEN OUTPUT F-MOVIMIENTOS
+               IF FSM = 0
+                   GO TO CONSULTA-SALDO
+               ELSE
+                   GO TO CONSULTA-SALDO
+           ELSE
+               IF FSM <> 00
+                   GO TO PSYS-ERR.
 
            MOVE 0 TO LAST-USER-MOV-NUM.
            MOVE 0 TO LAST-MOV-NUM.
@@ -310,7 +315,7 @@
            MOVE 9 TO LINEA-ESP-ACTUAL.
 
            OPEN I-O F-ESPECTACULOS.
-           IF FSE <> 30
+           IF FSE <> 00
                GO TO PSYS-ERR.
 
 
