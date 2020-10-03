@@ -65,7 +65,7 @@
            88 UP-ARROW-PRESSED      VALUE 2003.
            88 DOWN-ARROW-PRESSED    VALUE 2004.
            88 ESC-PRESSED           VALUE 2005.
-       77 PRESSED-KEY               PIC   9(4).
+       77 PRESSED-KEY BLANK ZERO    PIC   9(4).
 
        77 DIA1-USUARIO              PIC   9(2).
        77 MES1-USUARIO              PIC   9(2).
@@ -310,9 +310,9 @@
            DISPLAY "|" LINE 7 COL 66.
            DISPLAY "SALDO" LINE 7 COL 71.
 
-           DISPLAY "Re LINE 24 COL 2. pag - Esp. anteriores".
+           DISPLAY "Re. pag - Esp. anteriores" LINE 24 COL 2.
            DISPLAY "ESC - Salir" LINE 24 COL 33.
-           DISPLAY "Av LINE 24 COL 54. pag - Esp. posteriores".
+           DISPLAY "Av. pag - Esp. posteriores" LINE 24 COL 54.
 
            MOVE 0 TO MOV-EN-PANTALLA.
            MOVE 7 TO LINEA-MOV-ACTUAL.
@@ -466,10 +466,10 @@
 
            PERFORM IMPRIMIR-CABECERA THRU IMPRIMIR-CABECERA.
            DISPLAY "Ha ocurrido un error interno" LINE 9 COL 25
-               WITH FOREGROUND-COLOR IS BLACK
+               WITH FOREGROUND-COLOR IS WHITE
                     BACKGROUND-COLOR IS RED.
            DISPLAY "Vuelva mas tarde" LINE 11 COL 32
-               WITH FOREGROUND-COLOR IS BLACK
+               WITH FOREGROUND-COLOR IS WHITE
                     BACKGROUND-COLOR IS RED.
            DISPLAY "Enter - Aceptar" LINE 24 COL 33.
 

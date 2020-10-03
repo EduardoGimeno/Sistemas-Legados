@@ -87,7 +87,7 @@
            88 UP-ARROW-PRESSED      VALUE 2003.
            88 DOWN-ARROW-PRESSED    VALUE 2004.
            88 ESC-PRESSED           VALUE 2005.
-       77 PRESSED-KEY               PIC   9(4).
+       77 PRESSED-KEY BLANK ZERO    PIC   9(4).
 
        77 USER-NUM-ENTRADAS         PIC   9(2).
        77 USER-NUM-ESPECT           PIC   9(4).
@@ -307,9 +307,9 @@
            DISPLAY "|" LINE 9 COL 72.
            DISPLAY "IMPORTE" LINE 9 COL 73.
 
-           DISPLAY "Re LINE 24 COL 2. pag - Esp. anteriores".
+           DISPLAY "Re. pag - Esp. anteriores" LINE 24 COL 2.
            DISPLAY "ESC - Salir" LINE 24 COL 33.
-           DISPLAY "Av LINE 24 COL 54. pag - Esp. posteriores".
+           DISPLAY "Av. pag - Esp. posteriores" LINE 24 COL 54.
 
            MOVE 0 TO ESP-EN-PANTALLA.
            MOVE 9 TO LINEA-ESP-ACTUAL.
@@ -427,7 +427,7 @@
 
            DISPLAY "Importe total: " LINE 14 COL 15.
            DISPLAY IMPORTE-ENTRADAS-ENT LINE 14 COL 30.
-           DISPLAY " LINE 14 COL 36.".
+           DISPLAY "." LINE 14 COL 36.
            DISPLAY IMPORTE-ENTRADAS-DEC LINE 14 COL 37.
            DISPLAY "EUR" LINE 14 COL 40.
 
@@ -488,7 +488,7 @@
            DISPLAY "Por favor, retire las entradas" LINE 9 COL 25.
            DISPLAY "El saldo resultante es de" LINE 12 COL 21.
            DISPLAY SALDOPOSTERIOR.
-           DISPLAY " LINE 12 COL 57.".
+           DISPLAY "." LINE 12 COL 57.
            DISPLAY SALDO-POST-DEC LINE 12 COL 58.
 
            DISPLAY "Enter - Aceptar" LINE 24 COL 33.
@@ -504,11 +504,14 @@
            PERFORM IMPRIMIR-CABECERA THRU IMPRIMIR-CABECERA.
            DISPLAY "Compra de entradas de espectaculos" LINE 06 COL 22.
            DISPLAY "Lamentamos comunicarle que" LINE 08 COL 27
-               WITH BACKGROUND-COLOR RED.
+               WITH FOREGROUND-COLOR IS WHITE
+			        BACKGROUND-COLOR RED.
            DISPLAY "El espectaculo seleccionado no" LINE 9 COL 9
-               WITH BACKGROUND-COLOR RED.
+               WITH FOREGROUND-COLOR IS WHITE
+			        BACKGROUND-COLOR RED.
            DISPLAY "dispone de suficientes entradas" LINE 9 COL 40
-               WITH BACKGROUND-COLOR RED.
+               WITH FOREGROUND-COLOR IS WHITE
+			        BACKGROUND-COLOR RED.
            DISPLAY "Enter - Aceptar" LINE 24 COL 33.
 
            GO TO VENTA-ERR-ENTER.
@@ -517,9 +520,11 @@
            PERFORM IMPRIMIR-CABECERA THRU IMPRIMIR-CABECERA.
            DISPLAY "Compra de entradas de espectaculos" LINE 6 COL 22.
            DISPLAY "Lamentamos comunicarle que" LINE 8 COL 27
-               WITH BACKGROUND-COLOR RED.
+               WITH FOREGROUND-COLOR IS WHITE
+			        BACKGROUND-COLOR RED.
            DISPLAY "su saldo es insuficiente" LINE 9 COL 28
-               WITH BACKGROUND-COLOR RED.
+               WITH FOREGROUND-COLOR IS WHITE
+			        BACKGROUND-COLOR RED.
            DISPLAY "Enter - Aceptar" LINE 24 COL 33.
 
        VENTA-ERR-ENTER.
@@ -640,10 +645,10 @@
 
            PERFORM IMPRIMIR-CABECERA THRU IMPRIMIR-CABECERA.
            DISPLAY "Ha ocurrido un error interno" LINE 9 COL 25
-               WITH FOREGROUND-COLOR IS BLACK
+               WITH FOREGROUND-COLOR IS WHITE
                     BACKGROUND-COLOR IS RED.
            DISPLAY "Vuelva mas tarde" LINE 11 COL 32
-               WITH FOREGROUND-COLOR IS BLACK
+               WITH FOREGROUND-COLOR IS WHITE
                     BACKGROUND-COLOR IS RED.
            DISPLAY "Enter - Aceptar" LINE 24 COL 33.
 

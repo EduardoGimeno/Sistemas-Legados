@@ -81,7 +81,7 @@
            88 DOWN-ARROW-PRESSED VALUE  2004.
            88 ESC-PRESSED        VALUE  2005.
 
-       77 PRESSED-KEY              PIC   9(4).
+       77 PRESSED-KEY BLANK ZERO   PIC   9(4).
 
        77 LAST-MOV-NUM             PIC  9(35).
        77 LAST-USER-ORD-MOV-NUM    PIC  9(35).
@@ -213,7 +213,8 @@
 
            IF CENT-IMPOR-USER > CENT-SALDO-ORD-USER THEN
                    DISPLAY "Indique una cantidad menor!!" LINE 20 COL 19
-                    WITH BACKGROUND-COLOR RED
+                    WITH FOREGROUND-COLOR IS WHITE
+					     BACKGROUND-COLOR RED
                    GO TO INDICAR-CTA-DST
            END-IF.
 
@@ -237,7 +238,8 @@
            END-IF.
 
            DISPLAY "Indique una cantidad menor!!" LINE 20 COL 19
-            WITH BACKGROUND-COLOR RED.
+            WITH FOREGROUND-COLOR IS WHITE
+			     BACKGROUND-COLOR RED.
 
            GO TO NO-MOVIMIENTOS.
 
@@ -363,10 +365,10 @@
 
            PERFORM IMPRIMIR-CABECERA THRU IMPRIMIR-CABECERA.
            DISPLAY "Ha ocurrido un error interno" LINE 09 COL 25
-               WITH FOREGROUND-COLOR IS BLACK
+               WITH FOREGROUND-COLOR IS WHITE
                     BACKGROUND-COLOR IS RED.
            DISPLAY "Vuelva mas tarde" LINE 11 COL 32
-               WITH FOREGROUND-COLOR IS BLACK
+               WITH FOREGROUND-COLOR IS WHITE
                     BACKGROUND-COLOR IS RED.
            DISPLAY "Enter - Aceptar" LINE 24 COL 33.
 
@@ -381,7 +383,7 @@
            CLOSE TARJETAS.
            PERFORM IMPRIMIR-CABECERA THRU IMPRIMIR-CABECERA.
            DISPLAY "La cuenta introducida es incorrecta" LINE 9 COL 22
-               WITH FOREGROUND-COLOR IS BLACK
+               WITH FOREGROUND-COLOR IS WHITE
                     BACKGROUND-COLOR IS RED.
            DISPLAY "Enter - Salir" LINE 24 COL 33.
            GO TO EXIT-ENTER.

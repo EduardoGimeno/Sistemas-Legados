@@ -77,7 +77,7 @@
        77 CENT-IMPOR-USER          PIC    9(9).
 
        77 CON                      PIC   X(35) VALUE "Retirada".
-       77 PRESSED-KEY              PIC    9(4).
+       77 PRESSED-KEY BLANK ZERO   PIC    9(4).
 
        LINKAGE SECTION.
        77 TNUM                     PIC  9(16).
@@ -223,7 +223,7 @@
            DISPLAY SALDO-DISPLAY.
 
            DISPLAY "Indique la cantidad:         " LINE 11 COL 19.
-           DISPLAY " LINE 11 COL 47.".
+           DISPLAY "." LINE 11 COL 47.
            DISPLAY "EUR" LINE 11 COL 51.
 
            ACCEPT ENTRADA-USUARIO ON EXCEPTION
@@ -238,7 +238,8 @@
 
            IF CENT-IMPOR-USER > CENT-SALDO-USER THEN
                DISPLAY "Indique una cantidad menor!!" LINE 15 COL 19
-                   WITH BACKGROUND-COLOR RED
+                   WITH FOREGROUND-COLOR IS WHITE
+				        BACKGROUND-COLOR RED
                GO TO PANTALLA-RETIRADA
            END-IF.
 
@@ -303,10 +304,10 @@
 
            PERFORM IMPRIMIR-CABECERA THRU IMPRIMIR-CABECERA.
            DISPLAY "Ha ocurrido un error interno" LINE 9 COL 25
-               WITH FOREGROUND-COLOR IS BLACK
+               WITH FOREGROUND-COLOR IS WHITE
                     BACKGROUND-COLOR IS RED.
            DISPLAY "Vuelva mas tarde" LINE 11 COL 32
-               WITH FOREGROUND-COLOR IS BLACK
+               WITH FOREGROUND-COLOR IS WHITE
                     BACKGROUND-COLOR IS RED.
            DISPLAY "Enter - Aceptar" LINE 24 COL 33.
 

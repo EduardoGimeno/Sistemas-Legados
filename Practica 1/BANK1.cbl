@@ -73,7 +73,7 @@
 
        77 PRESSED-KEY              PIC  9(4).
        77 PIN-INTRODUCIDO          PIC  9(4).
-       77 CHOICE                   PIC  9(1).
+       77 CHOICE BLANK ZERO        PIC  9(1).
 
 
        SCREEN SECTION.
@@ -97,14 +97,15 @@
            DISPLAY BLANK-SCREEN.
 
            DISPLAY "Cajero Automatico UnizarBank" LINE 2 COL 26
-               WITH FOREGROUND-COLOR IS BLUE.
+               WITH FOREGROUND-COLOR IS BLUE
+				    BACKGROUND-COLOR IS CYAN.
 
            MOVE FUNCTION CURRENT-DATE TO CAMPOS-FECHA.
 
            DISPLAY DIA LINE 4 COL 32.
            DISPLAY "-" LINE 4 COL 34.
            DISPLAY MES LINE 4 COL 35.
-           DISPLAY "-" LINE 4 COL 36.
+           DISPLAY "-" LINE 4 COL 37.
            DISPLAY ANO LINE 4 COL 38.
            DISPLAY HORAS LINE 4 COL 44.
            DISPLAY ":" LINE 4 COL 46.
@@ -113,7 +114,8 @@
 
        P1.
            DISPLAY "Bienvenido a UnizarBank" LINE 8 COL 28.
-           DISPLAY "Por favor, introduzca la tarjeta para operar" LINE 10 COL 18.
+           DISPLAY "Por favor, introduzca la tarjeta" LINE 10 COL 18.
+           DISPLAY "para operar" LINE 10 COL 51.
            DISPLAY "Enter - Aceptar" LINE 24 COL 33.
 
 
@@ -219,10 +221,10 @@
 
            PERFORM IMPRIMIR-CABECERA THRU IMPRIMIR-CABECERA.
            DISPLAY "Ha ocurrido un error interno" LINE 9 COL 25
-               WITH FOREGROUND-COLOR IS BLACK
+               WITH FOREGROUND-COLOR IS WHITE
                     BACKGROUND-COLOR IS RED.
            DISPLAY "Vuelva mas tarde" LINE 11 COL 32
-               WITH FOREGROUND-COLOR IS BLACK
+               WITH FOREGROUND-COLOR IS WHITE
                     BACKGROUND-COLOR IS RED.
            DISPLAY "Enter - Aceptar" LINE 24 COL 33.
            GO TO PINT-ERR-ENTER.
@@ -234,14 +236,17 @@
            CLOSE INTENTOS.
 
            PERFORM IMPRIMIR-CABECERA THRU IMPRIMIR-CABECERA.
-           DISPLAY "(9 20) Se ha sobrepasado el numero de intentos"
-               WITH FOREGROUND-COLOR IS BLACK
-                    BACKGROUND-COLOR IS RED.
+           DISPLAY "Se ha sobrepasado el numero de" LINE 9 COL 20
+		       WITH FOREGROUND-COLOR IS WHITE
+			        BACKGROUND-COLOR IS RED.
+		   DISPLAY "intentos" LINE 9 COL 51
+		       WITH FOREGROUND-COLOR IS WHITE
+			        BACKGROUND-COLOR IS RED.
            DISPLAY "Por su seguridad se ha bloqueado la tarjeta" LINE 11 COL 18
-               WITH FOREGROUND-COLOR IS BLACK
+               WITH FOREGROUND-COLOR IS WHITE
                     BACKGROUND-COLOR IS RED.
            DISPLAY "Acuda a una sucursal" LINE 12 COL 30
-               WITH FOREGROUND-COLOR IS BLACK
+               WITH FOREGROUND-COLOR IS WHITE
                     BACKGROUND-COLOR IS RED.
            DISPLAY "Enter - Aceptar" LINE 24 COL 33.
 
@@ -262,17 +267,17 @@
 
            PERFORM IMPRIMIR-CABECERA THRU IMPRIMIR-CABECERA.
            DISPLAY "El codigo PIN es incorrecto" LINE 9 COL 26
-               WITH FOREGROUND-COLOR IS BLACK
+               WITH FOREGROUND-COLOR IS WHITE
                     BACKGROUND-COLOR IS RED.
            DISPLAY "Le quedan " LINE 11 COL 30
-               WITH FOREGROUND-COLOR IS BLACK
+               WITH FOREGROUND-COLOR IS WHITE
                     BACKGROUND-COLOR IS RED.
            DISPLAY IINTENTOS LINE 11 COL 40
-               WITH FOREGROUND-COLOR IS BLACK
+               WITH FOREGROUND-COLOR IS WHITE
                     BACKGROUND-COLOR IS RED.
            DISPLAY " intentos" LINE 11 COL 42
 
-               WITH FOREGROUND-COLOR IS BLACK
+               WITH FOREGROUND-COLOR IS WHITE
                     BACKGROUND-COLOR IS RED.
 
            DISPLAY "Enter - Aceptar" LINE 24 COL 1.
