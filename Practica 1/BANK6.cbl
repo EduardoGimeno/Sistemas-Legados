@@ -14,7 +14,7 @@
            RECORD KEY IS TNUM-E
            FILE STATUS IS FST.
 
-           SELECT F-MOVIMIENTOS ASSIGN TO DISK
+           SELECT F-MOVIMIENTOS ASSIGN TO "movimientos.ubd"
            ORGANIZATION IS INDEXED
            ACCESS MODE IS DYNAMIC
            RECORD KEY IS MOV-NUM
@@ -29,9 +29,7 @@
        01 TAJETAREG.
            02 TNUM-E      PIC 9(16).
            02 TPIN-E      PIC  9(4).
-       FD F-MOVIMIENTOS
-           LABEL RECORD STANDARD
-           VALUE OF FILE-ID IS "movimientos.ubd".
+       FD F-MOVIMIENTOS.
        01 MOVIMIENTO-REG.
            02 MOV-NUM              PIC  9(35).
            02 MOV-TARJETA          PIC  9(16).
@@ -81,7 +79,7 @@
            88 DOWN-ARROW-PRESSED VALUE  2004.
            88 ESC-PRESSED        VALUE  2005.
 
-       77 PRESSED-KEY BLANK ZERO   PIC   9(4).
+       77 PRESSED-KEY              PIC   9(4).
 
        77 LAST-MOV-NUM             PIC  9(35).
        77 LAST-USER-ORD-MOV-NUM    PIC  9(35).
@@ -97,7 +95,19 @@
        77 CENT-IMPOR-USER          PIC  S9(9).
 
        77 MSJ-ORD                  PIC  X(35) VALUE "Transferimos".
+       77 MSJ-ORD-MENSUAL          PIC  X(35) 
+           VALUE "Transferimos mensual".
        77 MSJ-DST                  PIC  X(35) VALUE "Nos transfieren".
+       77 MSJ-DST-MENSUAL          PIC  X(35) 
+           VALUE "Nos transfieren mensual".
+
+       77 ELECCION                 PIC 9(1).
+       77 DIA-TRANSFERENCIA-PUNTUAL PIC 9(2).
+       77 MES-TRANSFERENCIA-PUNTUAL PIC 9(2).
+       77 ANO-TRANSFERENCIA-PUNTUAL PIC 9(4).
+       77 DIA-TRANSFERENCIA-MENSUAL PIC 9(2).
+       77 HOY                      PIC 9(1).
+       77 DEBUG                    PIC 9(1).
 
        LINKAGE SECTION.
        77 TNUM                     PIC  9(16).
@@ -105,6 +115,36 @@
        SCREEN SECTION.
        01 BLANK-SCREEN.
            05 FILLER LINE 1 BLANK SCREEN BACKGROUND-COLOR BLACK.
+
+       01 FILTRO-CUENTA-PUNTUAL.
+           05 FILLER BLANK WHEN ZERO UNDERLINE
+               LINE 12 COL 54 PIC 9(16) USING CUENTA-DESTINO.
+           05 FILLER AUTO UNDERLINE
+               LINE 14 COL 54 PIC X(15) USING NOMBRE-DESTINO.
+           05 FILLER BLANK ZERO UNDERLINE
+               SIGN IS LEADING SEPARATE
+               LINE 16 COL 54 PIC -9(7) USING EURENT-USUARIO.
+           05 FILLER BLANK ZERO UNDERLINE
+               LINE 16 COL 63 PIC 9(2) USING EURDEC-USUARIO.
+           05 FILLER BLANK ZERO AUTO UNDERLINE
+               LINE 20 COL 54 PIC 9(2) USING DIA-TRANSFERENCIA-PUNTUAL.
+           05 FILLER BLANK ZERO AUTO UNDERLINE
+               LINE 21 COL 54 PIC 9(2) USING MES-TRANSFERENCIA-PUNTUAL.
+           05 FILLER BLANK ZERO AUTO UNDERLINE
+               LINE 22 COL 54 PIC 9(4) USING ANO-TRANSFERENCIA-PUNTUAL.
+
+       01 FILTRO-CUENTA-MENSUAL.
+           05 FILLER BLANK WHEN ZERO AUTO UNDERLINE
+               LINE 12 COL 54 PIC 9(16) USING CUENTA-DESTINO.
+           05 FILLER AUTO UNDERLINE
+               LINE 14 COL 54 PIC X(15) USING NOMBRE-DESTINO.
+           05 FILLER BLANK ZERO AUTO UNDERLINE
+               SIGN IS LEADING SEPARATE
+               LINE 16 COL 54 PIC -9(7) USING EURENT-USUARIO.
+           05 FILLER BLANK ZERO UNDERLINE
+               LINE 16 COL 63 PIC 9(2) USING EURDEC-USUARIO.
+           05 FILLER BLANK ZERO AUTO UNDERLINE
+               LINE 18 COL 54 PIC 9(2) USING DIA-TRANSFERENCIA-MENSUAL.
 
        01 FILTRO-CUENTA.
            05 FILLER BLANK WHEN ZERO AUTO UNDERLINE
@@ -116,6 +156,10 @@
                LINE 16 COL 54 PIC -9(7) USING EURENT-USUARIO.
            05 FILLER BLANK ZERO UNDERLINE
                LINE 16 COL 63 PIC 9(2) USING EURDEC-USUARIO.
+
+       01 TIPO-TRANSFERENCIA.
+           05 FILLER BLANK ZERO AUTO UNDERLINE
+               LINE 16 COL 19 PIC 9(1) USING ELECCION.
 
        01 SALDO-DISPLAY.
            05 FILLER SIGN IS LEADING SEPARATE
@@ -136,6 +180,13 @@
            INITIALIZE LAST-MOV-NUM.
            INITIALIZE LAST-USER-ORD-MOV-NUM.
            INITIALIZE LAST-USER-DST-MOV-NUM.
+           INITIALIZE ELECCION.
+           INITIALIZE DIA-TRANSFERENCIA-PUNTUAL.
+           INITIALIZE MES-TRANSFERENCIA-PUNTUAL.
+           INITIALIZE ANO-TRANSFERENCIA-PUNTUAL.
+           INITIALIZE DIA-TRANSFERENCIA-MENSUAL.
+           INITIALIZE HOY.
+           INITIALIZE DEBUG.
 
        IMPRIMIR-CABECERA.
            DISPLAY BLANK-SCREEN.
@@ -155,9 +206,16 @@
 
        MOVIMIENTOS-OPEN.
            OPEN I-O F-MOVIMIENTOS.
-           IF FSM <> 30 THEN
-               GO TO PSYS-ERR
-           END-IF.
+           IF FSM = 35
+               OPEN OUTPUT F-MOVIMIENTOS
+               IF FSM = 0
+                   GO TO MOVIMIENTOS-OPEN
+               ELSE
+                   GO TO MOVIMIENTOS-OPEN
+           ELSE
+               IF FSM <> 00
+                   MOVE 4 TO DEBUG
+                   GO TO PSYS-ERR.
 
        LECTURA-MOVIMIENTOS.
            READ F-MOVIMIENTOS NEXT RECORD AT END GO TO ORDENACION-TRF.
@@ -174,15 +232,27 @@
        ORDENACION-TRF.
            CLOSE F-MOVIMIENTOS.
 
+           DISPLAY "Transferencia a realizar:" LINE 10 COL 19.
+           DISPLAY "1: Puntual" LINE 12 COL 19.
+           DISPLAY "2: Mensual" LINE 14 COL 19.
+           DISPLAY "ESC - Cancelar" LINE 24 COL 66.
+
+           ACCEPT TIPO-TRANSFERENCIA ON EXCEPTION
+           IF ESC-PRESSED
+               EXIT PROGRAM
+           ELSE
+               GO TO ORDENACION-TRF.
+
+           PERFORM IMPRIMIR-CABECERA THRU IMPRIMIR-CABECERA.    
+
            DISPLAY "Ordenar Transferencia" LINE 8 COL 30.
            DISPLAY "Saldo Actual:" LINE 10 COL 19.
 
            DISPLAY "Enter - Confirmar" LINE 24 COL 2.
            DISPLAY "ESC - Cancelar" LINE 24 COL 66.
 
-           IF LAST-USER-ORD-MOV-NUM = 0 THEN
-               GO TO NO-MOVIMIENTOS
-           END-IF.
+           IF LAST-USER-ORD-MOV-NUM = 0
+               GO TO NO-MOVIMIENTOS.
 
            MOVE LAST-USER-ORD-MOV-NUM TO MOV-NUM.
 
@@ -190,33 +260,86 @@
            READ F-MOVIMIENTOS INVALID KEY GO PSYS-ERR.
            DISPLAY SALDO-DISPLAY.
            CLOSE F-MOVIMIENTOS.
+           IF ELECCION = 2
+               GO TO INDICAR-CTA-DST-MENSUAL.
 
-       INDICAR-CTA-DST.
-           DISPLAY "Indica la cuenta destino" LINE 12 COL 19.
+       INDICAR-CTA-DST-PUNTUAL.
+           DISPLAY "Indique la cuenta destino" LINE 12 COL 19.
            DISPLAY "y nombre del titular" LINE 14 COL 19.
            DISPLAY "Indique la cantidad a transferir" LINE 16 COL 19.
            DISPLAY "," LINE 16 COL 61.
            DISPLAY "EUR" LINE 16 COL 66.
+           DISPLAY "Indique la fecha" LINE 18 COL 19.
+           DISPLAY "Maximo un año posterior" LINE 19 COL 19.
+           DISPLAY "Dia (dd):" LINE 20 COL 19.
+           DISPLAY "Mes (mm):" LINE 21 COL 19.
+           DISPLAY "Ano (aaaa):" LINE 22 COL 19.
 
            COMPUTE CENT-SALDO-ORD-USER = (MOV-SALDOPOS-ENT * 100)
                                          + MOV-SALDOPOS-DEC.
 
-           ACCEPT FILTRO-CUENTA ON EXCEPTION
-           IF ESC-PRESSED THEN
+           ACCEPT FILTRO-CUENTA-PUNTUAL ON EXCEPTION
+           IF ESC-PRESSED
                EXIT PROGRAM
            ELSE
-               GO TO INDICAR-CTA-DST
-           END-IF.
+               GO TO INDICAR-CTA-DST-PUNTUAL.
 
            COMPUTE CENT-IMPOR-USER = (EURENT-USUARIO * 100)
                                      + EURDEC-USUARIO.
 
-           IF CENT-IMPOR-USER > CENT-SALDO-ORD-USER THEN
+           IF CENT-IMPOR-USER > CENT-SALDO-ORD-USER
                    DISPLAY "Indique una cantidad menor!!" LINE 20 COL 19
-                    WITH FOREGROUND-COLOR IS WHITE
-					     BACKGROUND-COLOR RED
-                   GO TO INDICAR-CTA-DST
-           END-IF.
+                   WITH BACKGROUND-COLOR RED
+                   GO TO INDICAR-CTA-DST-PUNTUAL.
+
+           IF DIA-TRANSFERENCIA-PUNTUAL < 1 OR DIA-TRANSFERENCIA-PUNTUAL > 31
+               DISPLAY "Indique un dia entre 1 y 31!!" LINE 20 COL 19
+               WITH BACKGROUND-COLOR RED
+               GO TO INDICAR-CTA-DST-PUNTUAL.
+
+           IF MES-TRANSFERENCIA-PUNTUAL < 1 OR MES-TRANSFERENCIA-PUNTUAL > 12
+               DISPLAY "Indique un mes entre 1 y 12!!" LINE 20 COL 19
+               WITH BACKGROUND-COLOR RED
+               GO TO INDICAR-CTA-DST-PUNTUAL.
+
+           MOVE FUNCTION CURRENT-DATE TO CAMPOS-FECHA.
+
+           IF ANO-TRANSFERENCIA-PUNTUAL < ANO
+               DISPLAY "Indique un ano valido!!" LINE 20 COL 19
+               WITH BACKGROUND-COLOR RED
+               GO TO INDICAR-CTA-DST-PUNTUAL.
+
+           GO TO REALIZAR-TRF-VERIFICACION.
+
+       INDICAR-CTA-DST-MENSUAL.
+           DISPLAY "Indique la cuenta destino" LINE 12 COL 19.
+           DISPLAY "y nombre del titular" LINE 14 COL 19.
+           DISPLAY "Indique la cantidad a transferir" LINE 16 COL 19.
+           DISPLAY "," LINE 16 COL 61.
+           DISPLAY "EUR" LINE 16 COL 66.
+           DISPLAY "Indique el dia del mes (dd)" LINE 18 COL 19.
+
+           COMPUTE CENT-SALDO-ORD-USER = (MOV-SALDOPOS-ENT * 100)
+                                         + MOV-SALDOPOS-DEC.
+           
+           ACCEPT FILTRO-CUENTA-MENSUAL ON EXCEPTION
+           IF ESC-PRESSED
+               EXIT PROGRAM
+           ELSE
+               GO TO INDICAR-CTA-DST-MENSUAL.
+
+           COMPUTE CENT-IMPOR-USER = (EURENT-USUARIO * 100)
+                                     + EURDEC-USUARIO.
+
+           IF CENT-IMPOR-USER > CENT-SALDO-ORD-USER
+                   DISPLAY "Indique una cantidad menor!!" LINE 20 COL 19
+                   WITH BACKGROUND-COLOR RED
+                   GO TO INDICAR-CTA-DST-MENSUAL.
+
+           IF DIA-TRANSFERENCIA-MENSUAL < 1 OR DIA-TRANSFERENCIA-MENSUAL > 28
+               DISPLAY "Indique un dia entre 1 y 28!!" LINE 20 COL 19
+               WITH BACKGROUND-COLOR RED
+               GO TO INDICAR-CTA-DST-MENSUAL.
 
            GO TO REALIZAR-TRF-VERIFICACION.
 
@@ -238,8 +361,7 @@
            END-IF.
 
            DISPLAY "Indique una cantidad menor!!" LINE 20 COL 19
-            WITH FOREGROUND-COLOR IS WHITE
-			     BACKGROUND-COLOR RED.
+            WITH BACKGROUND-COLOR RED.
 
            GO TO NO-MOVIMIENTOS.
 
@@ -253,6 +375,17 @@
            DISPLAY "EUR de su cuenta" LINE 11 COL 49.
            DISPLAY "a la cuenta cuyo titular es" LINE 12 COL 19.
            DISPLAY NOMBRE-DESTINO LINE 12 COL 48.
+           IF ELECCION = 2
+               DISPLAY "el dia" LINE 13 COL 19
+               DISPLAY DIA-TRANSFERENCIA-MENSUAL LINE 13 COL 26
+               DISPLAY "de cada mes" LINE 13 COL 29
+           ELSE
+               DISPLAY "el dia" LINE 13 COL 19
+               DISPLAY DIA-TRANSFERENCIA-PUNTUAL LINE 13 COL 26
+               DISPLAY "/" LINE 13 COL 28
+               DISPLAY MES-TRANSFERENCIA-PUNTUAL LINE 13 COL 29
+               DISPLAY "/" LINE 13 COL 31
+               DISPLAY ANO-TRANSFERENCIA-PUNTUAL LINE 13 COL 32.
 
            DISPLAY "Enter - Confirmar" LINE 24 COL 2.
            DISPLAY "ESC - Cancelar" LINE 24 COL 66.
@@ -267,7 +400,8 @@
 
        VERIFICACION-CTA-CORRECTA.
            OPEN I-O TARJETAS.
-           IF FST <> 30
+           IF FST <> 00
+              MOVE 1 TO DEBUG.
               GO TO PSYS-ERR.
 
            MOVE CUENTA-DESTINO TO TNUM-E.
@@ -292,14 +426,36 @@
            CLOSE F-MOVIMIENTOS.
            MOVE LAST-USER-DST-MOV-NUM TO MOV-NUM.
            PERFORM MOVIMIENTOS-OPEN THRU MOVIMIENTOS-OPEN.
-           READ F-MOVIMIENTOS INVALID KEY GO PSYS-ERR.
+           MOVE 2 TO DEBUG.
+           READ F-MOVIMIENTOS INVALID KEY 
+               MOVE 0 TO CENT-SALDO-DST-USER
+               GO TO CONTINUAR.
 
            COMPUTE CENT-SALDO-DST-USER = (MOV-SALDOPOS-ENT * 100)
                                          + MOV-SALDOPOS-DEC.
+       CONTINUAR.
+           ADD 1 TO LAST-MOV-NUM.
 
            MOVE FUNCTION CURRENT-DATE TO CAMPOS-FECHA.
 
-           ADD 1 TO LAST-MOV-NUM.
+           MOVE 0 TO HOY.
+
+           IF ELECCION = 2 AND DIA-TRANSFERENCIA-MENSUAL = DIA
+               MOVE 1 TO HOY
+
+           IF ELECCION = 1 AND DIA-TRANSFERENCIA-PUNTUAL = DIA AND
+               MES-TRANSFERENCIA-PUNTUAL = MES AND
+               ANO-TRANSFERENCIA-PUNTUAL = ANO
+                   MOVE 1 TO HOY.
+           
+           IF ELECCION = 2
+               MOVE DIA-TRANSFERENCIA-MENSUAL TO DIA
+               MOVE 0 TO MES
+               MOVE 0 TO ANO
+           ELSE
+               MOVE DIA-TRANSFERENCIA-PUNTUAL TO DIA
+               MOVE MES-TRANSFERENCIA-PUNTUAL TO MES
+               MOVE ANO-TRANSFERENCIA-PUNTUAL TO ANO.
 
            MOVE LAST-MOV-NUM   TO MOV-NUM.
            MOVE TNUM           TO MOV-TARJETA.
@@ -315,14 +471,19 @@
            MULTIPLY -1 BY EURENT-USUARIO.
            MOVE EURDEC-USUARIO TO MOV-IMPORTE-DEC.
 
-           MOVE MSJ-ORD        TO MOV-CONCEPTO.
-
-           SUBTRACT CENT-IMPOR-USER FROM CENT-SALDO-ORD-USER.
+           IF ELECCION = 2
+               MOVE MSJ-ORD-MENSUAL TO MOV-CONCEPTO
+           ELSE
+               MOVE MSJ-ORD TO MOV-CONCEPTO.
+           
+           IF HOY = 1
+               SUBTRACT CENT-IMPOR-USER FROM CENT-SALDO-ORD-USER.
 
            COMPUTE MOV-SALDOPOS-ENT = (CENT-SALDO-ORD-USER / 100).
            MOVE FUNCTION MOD(CENT-SALDO-ORD-USER, 100)
                TO MOV-SALDOPOS-DEC.
-
+           
+           MOVE 3 TO DEBUG.
            WRITE MOVIMIENTO-REG INVALID KEY GO TO PSYS-ERR.
 
            ADD 1 TO LAST-MOV-NUM.
@@ -339,12 +500,16 @@
            MOVE EURENT-USUARIO TO MOV-IMPORTE-ENT.
            MOVE EURDEC-USUARIO TO MOV-IMPORTE-DEC.
 
-           MOVE MSJ-DST        TO MOV-CONCEPTO.
-
-           ADD CENT-IMPOR-USER TO CENT-SALDO-DST-USER.
-           COMPUTE MOV-SALDOPOS-ENT = (CENT-SALDO-DST-USER / 100).
-           MOVE FUNCTION MOD(CENT-SALDO-DST-USER, 100)
-               TO MOV-SALDOPOS-DEC.
+           IF ELECCION = 2
+               MOVE MSJ-DST-MENSUAL TO MOV-CONCEPTO
+           ELSE
+               MOVE MSJ-DST        TO MOV-CONCEPTO.
+           
+           IF HOY = 1
+               ADD CENT-IMPOR-USER TO CENT-SALDO-DST-USER
+               COMPUTE MOV-SALDOPOS-ENT = (CENT-SALDO-DST-USER / 100)
+               MOVE FUNCTION MOD(CENT-SALDO-DST-USER, 100)
+                   TO MOV-SALDOPOS-DEC.
 
            WRITE MOVIMIENTO-REG INVALID KEY GO TO PSYS-ERR.
 
@@ -364,11 +529,12 @@
            CLOSE F-MOVIMIENTOS.
 
            PERFORM IMPRIMIR-CABECERA THRU IMPRIMIR-CABECERA.
+           DISPLAY DEBUG LINE 7 COL 25.
            DISPLAY "Ha ocurrido un error interno" LINE 09 COL 25
-               WITH FOREGROUND-COLOR IS WHITE
+               WITH FOREGROUND-COLOR IS BLACK
                     BACKGROUND-COLOR IS RED.
            DISPLAY "Vuelva mas tarde" LINE 11 COL 32
-               WITH FOREGROUND-COLOR IS WHITE
+               WITH FOREGROUND-COLOR IS BLACK
                     BACKGROUND-COLOR IS RED.
            DISPLAY "Enter - Aceptar" LINE 24 COL 33.
 
@@ -383,7 +549,7 @@
            CLOSE TARJETAS.
            PERFORM IMPRIMIR-CABECERA THRU IMPRIMIR-CABECERA.
            DISPLAY "La cuenta introducida es incorrecta" LINE 9 COL 22
-               WITH FOREGROUND-COLOR IS WHITE
+               WITH FOREGROUND-COLOR IS BLACK
                     BACKGROUND-COLOR IS RED.
            DISPLAY "Enter - Salir" LINE 24 COL 33.
            GO TO EXIT-ENTER.
