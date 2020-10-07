@@ -107,7 +107,6 @@
        77 ANO-TRANSFERENCIA-PUNTUAL PIC 9(4).
        77 DIA-TRANSFERENCIA-MENSUAL PIC 9(2).
        77 HOY                      PIC 9(1).
-       77 DEBUG                    PIC 9(1).
 
        LINKAGE SECTION.
        77 TNUM                     PIC  9(16).
@@ -134,11 +133,11 @@
                LINE 22 COL 54 PIC 9(4) USING ANO-TRANSFERENCIA-PUNTUAL.
 
        01 FILTRO-CUENTA-MENSUAL.
-           05 FILLER BLANK WHEN ZERO AUTO UNDERLINE
+           05 FILLER BLANK WHEN ZERO UNDERLINE
                LINE 12 COL 54 PIC 9(16) USING CUENTA-DESTINO.
            05 FILLER AUTO UNDERLINE
                LINE 14 COL 54 PIC X(15) USING NOMBRE-DESTINO.
-           05 FILLER BLANK ZERO AUTO UNDERLINE
+           05 FILLER BLANK ZERO UNDERLINE
                SIGN IS LEADING SEPARATE
                LINE 16 COL 54 PIC -9(7) USING EURENT-USUARIO.
            05 FILLER BLANK ZERO UNDERLINE
@@ -186,7 +185,6 @@
            INITIALIZE ANO-TRANSFERENCIA-PUNTUAL.
            INITIALIZE DIA-TRANSFERENCIA-MENSUAL.
            INITIALIZE HOY.
-           INITIALIZE DEBUG.
 
        IMPRIMIR-CABECERA.
            DISPLAY BLANK-SCREEN.
@@ -214,7 +212,6 @@
                    GO TO MOVIMIENTOS-OPEN
            ELSE
                IF FSM <> 00
-                   MOVE 4 TO DEBUG
                    GO TO PSYS-ERR.
 
        LECTURA-MOVIMIENTOS.
@@ -401,7 +398,6 @@
        VERIFICACION-CTA-CORRECTA.
            OPEN I-O TARJETAS.
            IF FST <> 00
-              MOVE 1 TO DEBUG.
               GO TO PSYS-ERR.
 
            MOVE CUENTA-DESTINO TO TNUM-E.
@@ -426,13 +422,13 @@
            CLOSE F-MOVIMIENTOS.
            MOVE LAST-USER-DST-MOV-NUM TO MOV-NUM.
            PERFORM MOVIMIENTOS-OPEN THRU MOVIMIENTOS-OPEN.
-           MOVE 2 TO DEBUG.
            READ F-MOVIMIENTOS INVALID KEY 
                MOVE 0 TO CENT-SALDO-DST-USER
                GO TO CONTINUAR.
 
            COMPUTE CENT-SALDO-DST-USER = (MOV-SALDOPOS-ENT * 100)
                                          + MOV-SALDOPOS-DEC.
+
        CONTINUAR.
            ADD 1 TO LAST-MOV-NUM.
 
@@ -441,7 +437,7 @@
            MOVE 0 TO HOY.
 
            IF ELECCION = 2 AND DIA-TRANSFERENCIA-MENSUAL = DIA
-               MOVE 1 TO HOY
+               MOVE 1 TO HOY.
 
            IF ELECCION = 1 AND DIA-TRANSFERENCIA-PUNTUAL = DIA AND
                MES-TRANSFERENCIA-PUNTUAL = MES AND
@@ -483,7 +479,6 @@
            MOVE FUNCTION MOD(CENT-SALDO-ORD-USER, 100)
                TO MOV-SALDOPOS-DEC.
            
-           MOVE 3 TO DEBUG.
            WRITE MOVIMIENTO-REG INVALID KEY GO TO PSYS-ERR.
 
            ADD 1 TO LAST-MOV-NUM.
@@ -509,6 +504,11 @@
                ADD CENT-IMPOR-USER TO CENT-SALDO-DST-USER
                COMPUTE MOV-SALDOPOS-ENT = (CENT-SALDO-DST-USER / 100)
                MOVE FUNCTION MOD(CENT-SALDO-DST-USER, 100)
+                   TO MOV-SALDOPOS-DEC
+           ELSE
+               ADD 0 TO CENT-SALDO-DST-USER
+               COMPUTE MOV-SALDOPOS-ENT = (CENT-SALDO-DST-USER / 100)
+               MOVE FUNCTION MOD(CENT-SALDO-DST-USER, 100)
                    TO MOV-SALDOPOS-DEC.
 
            WRITE MOVIMIENTO-REG INVALID KEY GO TO PSYS-ERR.
@@ -517,9 +517,9 @@
 
        P-EXITO.
            PERFORM IMPRIMIR-CABECERA THRU IMPRIMIR-CABECERA.
-
+           
            DISPLAY "Ordenar transferencia" LINE 8 COL 30.
-           DISPLAY "Transf. realizada correctamente" LINE 11 COL 19.
+           DISPLAY "Transf. realizada correctamente" LINE 11 COL 23.
            DISPLAY "Enter - Aceptar" LINE 24 COL 33.
 
            GO TO EXIT-ENTER.
@@ -529,7 +529,6 @@
            CLOSE F-MOVIMIENTOS.
 
            PERFORM IMPRIMIR-CABECERA THRU IMPRIMIR-CABECERA.
-           DISPLAY DEBUG LINE 7 COL 25.
            DISPLAY "Ha ocurrido un error interno" LINE 09 COL 25
                WITH FOREGROUND-COLOR IS BLACK
                     BACKGROUND-COLOR IS RED.
