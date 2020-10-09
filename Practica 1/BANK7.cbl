@@ -8,7 +8,7 @@
 
        INPUT-OUTPUT SECTION.
        FILE-CONTROL.
-           SELECT F-MOVIMIENTOS ASSIGN TO "movimientos.ubd"
+           SELECT F-MOVIMIENTOS ASSIGN TO DISK
            ORGANIZATION IS INDEXED
            ACCESS MODE IS DYNAMIC
            RECORD KEY IS MOV-NUM
@@ -17,7 +17,9 @@
 
        DATA DIVISION.
        FILE SECTION.
-       FD F-MOVIMIENTOS.
+       FD F-MOVIMIENTOS
+           LABEL RECORD STANDARD
+           VALUE OF FILE-ID IS "movimientos.ubd".
        01 MOVIMIENTO-REG.
            02 MOV-NUM               PIC  9(35).
            02 MOV-TARJETA           PIC  9(16).
@@ -120,6 +122,8 @@
                FOREGROUND-COLOR YELLOW PIC A FROM "-".
            05 MOV-ANO-PAR LINE LINEA-MOV-ACTUAL COL 08
                FOREGROUND-COLOR YELLOW PIC 9(4) FROM MOV-ANO.
+           05 SEPARADOR-PAR-2 LINE LINEA-MOV-ACTUAL COL 18
+               FOREGROUND-COLOR YELLOW PIC A FROM "-".
            05 MOV-CONCEPTO-PAR LINE LINEA-MOV-ACTUAL COL 19
                FOREGROUND-COLOR YELLOW PIC X(35) FROM MOV-CONCEPTO.
            05 SEPARADOR-5-PAR LINE LINEA-MOV-ACTUAL COL 54
@@ -178,6 +182,7 @@
                WITH FOREGROUND-COLOR IS 1.
 
            MOVE FUNCTION CURRENT-DATE TO CAMPOS-FECHA.
+           MOVE FUNCTION CURRENT-DATE TO CAMPOS-FECHA.
 
            DISPLAY DIA LINE 4 COL 32.
            DISPLAY "-" LINE 4 COL 34.
@@ -190,17 +195,6 @@
 
        PCONSULTA-MOV.
 
-           OPEN INPUT F-MOVIMIENTOS.
-           IF FSM = 35
-               OPEN OUTPUT F-MOVIMIENTOS
-               IF FSM = 0
-                   GO TO PCONSULTA-MOV
-               ELSE
-                   GO TO PCONSULTA-MOV
-           ELSE
-               IF FSM <> 00
-                   GO TO PSYS-ERR.
-
            INITIALIZE DIA1-USUARIO.
            INITIALIZE MES1-USUARIO.
            INITIALIZE ANO1-USUARIO.
@@ -210,12 +204,12 @@
 
 
            DISPLAY "Se mostraran las ultimas transferencias," 
-               LINE 8 COL 0.
-           DISPLAY "de mas a menos recientes" LINE 8 COL 40.
+               LINE 8 COL 8.
+           DISPLAY "de mas a menos recientes" LINE 8 COL 48.
 
            DISPLAY "Alternativamente indique un intervalo" 
-               LINE 10 COL 0.
-           DISPLAY "de fechas" LINE 10 COL 40.
+               LINE 10 COL 8.
+           DISPLAY "de fechas" LINE 10 COL 48.
 
            DISPLAY "Entre las fechas    y    " LINE 13 COL 8.
       
@@ -235,6 +229,8 @@
                        MOVE 99   TO DIA2-USUARIO
                        MOVE 99   TO MES2-USUARIO
                        MOVE 9999 TO ANO2-USUARIO.
+
+           PERFORM IMPRIMIR-CABECERA THRU IMPRIMIR-CABECERA
 
            OPEN INPUT F-MOVIMIENTOS.
                IF FSM <> 00
@@ -402,7 +398,7 @@
            END-PERFORM.
 
        READ-MOVIMIENTO.
-           READ F-MOVIMIENTOS INVALID KEY GO TO PSYS-ERR.
+           READ F-MOVIMIENTOS.
 
        PSYS-ERR.
            CLOSE F-MOVIMIENTOS.
@@ -417,7 +413,7 @@
            DISPLAY "Enter - Aceptar" LINE 24 COL 33.
 
        EXIT-ENTER.
-           ACCEPT PRESSED-KEY
+           ACCEPT PRESSED-KEY AT LINE 24 COL 80
            IF ENTER-PRESSED
                EXIT PROGRAM
            ELSE
