@@ -71,9 +71,9 @@
            88 DOWN-ARROW-PRESSED  VALUE 2004.
            88 ESC-PRESSED         VALUE 2005.
 
-       77 PRESSED-KEY              PIC  9(4).
+       77 PRESSED-KEY BLANK ZERO   PIC  9(4).
        77 PIN-INTRODUCIDO          PIC  9(4).
-       77 CHOICE BLANK ZERO        PIC  9(1).
+       77 CHOICE                   PIC  9(1).
 
 
        SCREEN SECTION.
@@ -86,11 +86,12 @@
            05 PIN-ACCEPT BLANK ZERO SECURE LINE 09 COL 50
                PIC 9(4) USING PIN-INTRODUCIDO.
 
-
+       01 ELECCION.
+           05 FILLER BLANK ZERO AUTO UNDERLINE
+               LINE 17 COL 15 PIC 9(1) USING CHOICE.
 
        PROCEDURE DIVISION.
        IMPRIMIR-CABECERA.
-
            SET ENVIRONMENT 'COB_SCREEN_EXCEPTIONS' TO 'Y'
            SET ENVIRONMENT 'COB_SCREEN_ESC'        TO 'Y'
 
@@ -120,7 +121,7 @@
 
 
        P1-ENTER.
-           ACCEPT CHOICE ON EXCEPTION
+           ACCEPT PRESSED-KEY AT LINE 24 COL 80
            IF ENTER-PRESSED
                GO TO P2
            ELSE
@@ -165,6 +166,8 @@
            CLOSE TARJETAS.
            CLOSE INTENTOS.
 
+           INITIALIZE CHOICE.
+
            PERFORM IMPRIMIR-CABECERA THRU IMPRIMIR-CABECERA.
            DISPLAY "1 - Consultar saldo" LINE 8 COL 15.
            DISPLAY "2 - Consultar movimientos" LINE 9 COL 15.
@@ -177,12 +180,11 @@
            DISPLAY "ESC - Salir" LINE 24 COL 34.
 
        PMENUA1.
-           ACCEPT CHOICE ON EXCEPTION
+           ACCEPT ELECCION ON EXCEPTION
                IF ESC-PRESSED
                    GO TO IMPRIMIR-CABECERA
                ELSE
                    GO TO PMENUA1.
-
 
            IF CHOICE = 1
                CALL "BANK2" USING TNUM
@@ -218,7 +220,6 @@
 
            GO TO PMENU.
 
-
        PSYS-ERR.
 
            CLOSE TARJETAS.
@@ -234,7 +235,6 @@
            DISPLAY "Enter - Aceptar" LINE 24 COL 33.
            GO TO PINT-ERR-ENTER.
 
-
        PINT-ERR.
 
            CLOSE TARJETAS.
@@ -244,10 +244,11 @@
            DISPLAY "Se ha sobrepasado el numero de" LINE 9 COL 20
 		       WITH FOREGROUND-COLOR IS WHITE
 			        BACKGROUND-COLOR IS RED.
-		   DISPLAY "intentos" LINE 9 COL 51
+		   DISPLAY "intentos" LINE 9 COL 50
 		       WITH FOREGROUND-COLOR IS WHITE
 			        BACKGROUND-COLOR IS RED.
-           DISPLAY "Por su seguridad se ha bloqueado la tarjeta" LINE 11 COL 18
+           DISPLAY "Por su seguridad se ha bloqueado la tarjeta" 
+               LINE 11 COL 18
                WITH FOREGROUND-COLOR IS WHITE
                     BACKGROUND-COLOR IS RED.
            DISPLAY "Acuda a una sucursal" LINE 12 COL 30
@@ -256,12 +257,11 @@
            DISPLAY "Enter - Aceptar" LINE 24 COL 33.
 
        PINT-ERR-ENTER.
-           ACCEPT CHOICE ON EXCEPTION
+           ACCEPT PRESSED-KEY
            IF ENTER-PRESSED
                GO TO IMPRIMIR-CABECERA
            ELSE
                GO TO PINT-ERR-ENTER.
-
 
        PPIN-ERR.
            SUBTRACT 1 FROM IINTENTOS.
@@ -280,7 +280,7 @@
            DISPLAY IINTENTOS LINE 11 COL 40
                WITH FOREGROUND-COLOR IS WHITE
                     BACKGROUND-COLOR IS RED.
-           DISPLAY " intentos" LINE 11 COL 42
+           DISPLAY " intentos" LINE 11 COL 41
 
                WITH FOREGROUND-COLOR IS WHITE
                     BACKGROUND-COLOR IS RED.
@@ -289,7 +289,7 @@
            DISPLAY "ESC - Cancelar" LINE 24 COL 65.
 
        PPIN-ERR-ENTER.
-           ACCEPT CHOICE ON EXCEPTION
+           ACCEPT PRESSED-KEY
            IF ENTER-PRESSED
                GO TO P2
            ELSE
@@ -297,7 +297,6 @@
                    GO TO IMPRIMIR-CABECERA
                ELSE
                    GO TO PPIN-ERR-ENTER.
-
 
        REINICIAR-INTENTOS.
            MOVE 3 TO IINTENTOS.
