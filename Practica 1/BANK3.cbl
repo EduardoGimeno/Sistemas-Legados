@@ -108,27 +108,27 @@
 
        01 FILTRO-MOVIMIENTOS.
            05 DIA-MIN BLANK ZERO AUTO UNDERLINE
-               LINE 13 COL 37 PIC 9(2) USING DIA1-USUARIO.
+               LINE 17 COL 33 PIC 9(2) USING DIA1-USUARIO.
            05 MES-MIN BLANK ZERO AUTO UNDERLINE
-               LINE 13 COL 40 PIC 9(2) USING MES1-USUARIO.
+               LINE 17 COL 36 PIC 9(2) USING MES1-USUARIO.
            05 ANO-MIN BLANK ZERO AUTO UNDERLINE
-               LINE 13 COL 43 PIC 9(4) USING ANO1-USUARIO.
-           05 DIA-MAX BLANK ZERO BEEP AUTO UNDERLINE
-               LINE 13 COL 50 PIC 9(2) USING DIA2-USUARIO.
+               LINE 17 COL 39 PIC 9(4) USING ANO1-USUARIO.
+           05 DIA-MAX BLANK ZERO AUTO UNDERLINE
+               LINE 19 COL 33 PIC 9(2) USING DIA2-USUARIO.
            05 MES-MAX BLANK ZERO AUTO UNDERLINE
-               LINE 13 COL 53 PIC 9(2) USING MES2-USUARIO.
+               LINE 19 COL 36 PIC 9(2) USING MES2-USUARIO.
            05 ANO-MAX BLANK ZERO AUTO UNDERLINE
-               LINE 13 COL 56 PIC 9(4) USING ANO2-USUARIO.
+               LINE 19 COL 39 PIC 9(4) USING ANO2-USUARIO.
            05 EUR-ENT-MIN BLANK ZERO AUTO UNDERLINE
                SIGN IS LEADING SEPARATE
-               LINE 15 COL 30 PIC -9(7) USING EURENT1-USUARIO.
+               LINE 13 COL 35 PIC -9(7) USING EURENT1-USUARIO.
            05 EUR-DEC-MIN BLANK ZERO AUTO UNDERLINE
-               LINE 15 COL 39 PIC 9(2) USING EURDEC1-USUARIO.
+               LINE 13 COL 43 PIC 9(2) USING EURDEC1-USUARIO.
            05 EUR-ENT-MAX BLANK ZERO AUTO UNDERLINE
                SIGN IS LEADING SEPARATE
-               LINE 15 COL 48 PIC -9(7) USING EURENT2-USUARIO.
+               LINE 15 COL 35 PIC -9(7) USING EURENT2-USUARIO.
            05 EUR-DEC-MAX BLANK ZERO UNDERLINE
-               LINE 15 COL 57 PIC 9(2) USING EURDEC2-USUARIO.
+               LINE 15 COL 43 PIC 9(2) USING EURDEC2-USUARIO.
 
        01 FILA-MOVIMIENTO-PAR.
 
@@ -261,15 +261,19 @@
            INITIALIZE EURENT2-USUARIO.
            INITIALIZE EURDEC2-USUARIO.
 
-           DISPLAY "Se mostraran los ultimos movimientos," LINE 8 COL 0.
-           DISPLAY "de mas a menos recientes" LINE 8 COL 40.
+           DISPLAY "Se mostraran los ultimos movimientos," 
+               LINE 8 COL 10.
+           DISPLAY "de mas a menos recientes" LINE 8 COL 48.
 
-           DISPLAY "Alternativamente indique un intervalo" LINE 10 COL 0.
-           DISPLAY "de fechas o cantidades" LINE 10 COL 40.
+           DISPLAY "Alternativamente indique un intervalo" 
+               LINE 10 COL 10.
+           DISPLAY "de fechas o cantidades" LINE 10 COL 48.
 
-           DISPLAY "Entre las fechas    y    " LINE 13 COL 8.
-           DISPLAY "Cantidad entre        EUR y       EUR" LINE 15 COL 8.
-
+           DISPLAY "Cantidad minima        .   EUR" LINE 13 COL 19.
+           DISPLAY "Cantidad maxima        .   EUR" LINE 15 COL 19.
+           DISPLAY "Fecha inicial   /  /    " LINE 17 COL 19.
+           DISPLAY "Fecha final     /  /    " LINE 19 COL 19.
+         
            DISPLAY "Enter - Aceptar" LINE 24 COL 01.
            DISPLAY "ESC - Cancelar" LINE 24 COL 65.
 

@@ -79,7 +79,7 @@
            88 DOWN-ARROW-PRESSED VALUE  2004.
            88 ESC-PRESSED        VALUE  2005.
 
-       77 PRESSED-KEY              PIC   9(4).
+       77 PRESSED-KEY BLANK ZERO   PIC   9(4).
 
        77 LAST-MOV-NUM             PIC  9(35).
        77 LAST-USER-ORD-MOV-NUM    PIC  9(35).
@@ -342,7 +342,7 @@
 
        NO-MOVIMIENTOS.
            DISPLAY "0" LINE 10 COL 51.
-           DISPLAY " LINE 10 COL 52.".
+           DISPLAY "." LINE 10 COL 52.
            DISPLAY "00" LINE 10 COL 53.
            DISPLAY "EUR" LINE 10 COL 54.
 
@@ -367,7 +367,7 @@
            DISPLAY "Ordenar Transferencia" LINE 08 COL 30.
            DISPLAY "Va a transferir:" LINE 11 COL 19.
            DISPLAY EURENT-USUARIO LINE 11 COL 38.
-           DISPLAY " LINE 11 COL 45.".
+           DISPLAY "." LINE 11 COL 45.
            DISPLAY EURDEC-USUARIO LINE 11 COL 46.
            DISPLAY "EUR de su cuenta" LINE 11 COL 49.
            DISPLAY "a la cuenta cuyo titular es" LINE 12 COL 19.
