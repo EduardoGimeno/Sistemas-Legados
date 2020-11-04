@@ -8,16 +8,17 @@
 
        INPUT-OUTPUT SECTION.
        FILE-CONTROL.
-           SELECT F-MOVIMIENTOS ASSIGN TO "movimientos.ubd"
+           SELECT F-MOVIMIENTOS ASSIGN TO DISK
            ORGANIZATION IS INDEXED
            ACCESS MODE IS DYNAMIC
            RECORD KEY IS MOV-NUM
            FILE STATUS IS FSM.
 
-
        DATA DIVISION.
        FILE SECTION.
-       FD F-MOVIMIENTOS.
+       FD F-MOVIMIENTOS
+           LABEL RECORD STANDARD
+           VALUE OF FILE-ID IS "movimientos.ubd".
        01 MOVIMIENTO-REG.
            02 MOV-NUM               PIC  9(35).
            02 MOV-TARJETA           PIC  9(16).
@@ -32,7 +33,6 @@
            02 MOV-CONCEPTO          PIC  X(35).
            02 MOV-SALDOPOS-ENT      PIC  S9(9).
            02 MOV-SALDOPOS-DEC      PIC   9(2).
-
 
        WORKING-STORAGE SECTION.
        77 FSM                       PIC   X(2).
@@ -98,9 +98,10 @@
        77 ITERACIONES               PIC   9(2).
        77 COPIA-MOV                 PIC  9(35).
 
+       77 AUX                       PIC 9(7).
+
        LINKAGE SECTION.
        77 TNUM                      PIC  9(16).
-
 
        SCREEN SECTION.
        01 BLANK-SCREEN.
@@ -123,15 +124,14 @@
                SIGN IS LEADING SEPARATE
                LINE 13 COL 35 PIC -9(7) USING EURENT1-USUARIO.
            05 EUR-DEC-MIN BLANK ZERO AUTO UNDERLINE
-               LINE 13 COL 43 PIC 9(2) USING EURDEC1-USUARIO.
+               LINE 13 COL 44 PIC 9(2) USING EURDEC1-USUARIO.
            05 EUR-ENT-MAX BLANK ZERO AUTO UNDERLINE
                SIGN IS LEADING SEPARATE
                LINE 15 COL 35 PIC -9(7) USING EURENT2-USUARIO.
            05 EUR-DEC-MAX BLANK ZERO UNDERLINE
-               LINE 15 COL 43 PIC 9(2) USING EURDEC2-USUARIO.
+               LINE 15 COL 44 PIC 9(2) USING EURDEC2-USUARIO.
 
        01 FILA-MOVIMIENTO-PAR.
-
            05 MOV-DIA-PAR LINE LINEA-MOV-ACTUAL COL 02
                FOREGROUND-COLOR YELLOW PIC 99 FROM MOV-DIA.
            05 SEPARADOR-PAR-1 LINE LINEA-MOV-ACTUAL COL 04
@@ -214,10 +214,8 @@
            05 MOV-SALDOPOS-DEC-IMPAR LINE LINEA-MOV-ACTUAL COL 78
                PIC 99 FROM MOV-SALDOPOS-DEC.
 
-
        PROCEDURE DIVISION USING TNUM.
        IMPRIMIR-CABECERA.
-
            SET ENVIRONMENT 'COB_SCREEN_EXCEPTIONS' TO 'Y'
            SET ENVIRONMENT 'COB_SCREEN_ESC'        TO 'Y'
 
@@ -237,7 +235,6 @@
            DISPLAY MINUTOS LINE 4 COL 47.
 
        PCONSULTA-MOV.
-
            OPEN INPUT F-MOVIMIENTOS.
            IF FSM = 35
                OPEN OUTPUT F-MOVIMIENTOS
@@ -269,8 +266,8 @@
                LINE 10 COL 10.
            DISPLAY "de fechas o cantidades" LINE 10 COL 48.
 
-           DISPLAY "Cantidad minima        .   EUR" LINE 13 COL 19.
-           DISPLAY "Cantidad maxima        .   EUR" LINE 15 COL 19.
+           DISPLAY "Cantidad minima         .   EUR" LINE 13 COL 19.
+           DISPLAY "Cantidad maxima         .   EUR" LINE 15 COL 19.
            DISPLAY "Fecha inicial   /  /    " LINE 17 COL 19.
            DISPLAY "Fecha final     /  /    " LINE 19 COL 19.
          
@@ -321,7 +318,6 @@
            MOVE 0 TO MOV-EN-PANTALLA.
            MOVE 7 TO LINEA-MOV-ACTUAL.
 
-
        LEER-PRIMEROS.
            READ F-MOVIMIENTOS PREVIOUS RECORD AT END GO WAIT-ORDER.
                MOVE 1 TO MOV-VALIDO.
@@ -342,7 +338,6 @@
                GO TO LEER-PRIMEROS.
 
        WAIT-ORDER.
-
            ACCEPT PRESSED-KEY ON EXCEPTION
 
               IF ESC-PRESSED THEN
@@ -484,9 +479,7 @@
            ELSE
                GO TO EXIT-ENTER.
 
-
        FILTRADO.
-
            IF TNUM NOT = MOV-TARJETA
                MOVE 0 TO MOV-VALIDO.
 
@@ -507,10 +500,12 @@
            IF FECHA-MAX < FECHA-MOV
                MOVE 0 TO MOV-VALIDO.
 
+           MOVE MOV-IMPORTE-ENT TO AUX.
+
            COMPUTE CENT-MIN = (EURENT1-USUARIO * 100)
                               + (EURDEC1-USUARIO).
 
-           COMPUTE CENT-MOV = (MOV-IMPORTE-ENT * 100)
+           COMPUTE CENT-MOV = (AUX * 100)
                               + (MOV-IMPORTE-DEC).
 
            COMPUTE CENT-MAX = (EURENT2-USUARIO * 100)
@@ -521,16 +516,14 @@
            IF CENT-MAX < CENT-MOV
                MOVE 0 TO MOV-VALIDO.
 
-
        MOSTRAR-MOVIMIENTO.
-
            MOVE FUNCTION MOD(LINEA-MOV-ACTUAL, 2)
                TO MODULO-LIN-ACTUAL.
 
            IF MODULO-LIN-ACTUAL = 0
                DISPLAY FILA-MOVIMIENTO-PAR
            ELSE
-               DISPLAY FILA-MOVIMIENTO-IMPAR.
-
+               DISPLAY FILA-MOVIMIENTO-IMPAR.   
+                   
 	   END PROGRAM BANK3.
 	   

@@ -8,16 +8,17 @@
 
        INPUT-OUTPUT SECTION.
        FILE-CONTROL.
-           SELECT F-MOVIMIENTOS ASSIGN TO "movimientos.ubd"
+           SELECT F-MOVIMIENTOS ASSIGN TO DISK
            ORGANIZATION IS INDEXED
            ACCESS MODE IS DYNAMIC
            RECORD KEY IS MOV-NUM
            FILE STATUS IS FSM.
 
-
        DATA DIVISION.
        FILE SECTION.
-       FD F-MOVIMIENTOS.
+       FD F-MOVIMIENTOS
+           LABEL RECORD STANDARD
+           VALUE OF FILE-ID IS "movimientos.ubd".
        01 MOVIMIENTO-REG.
            02 MOV-NUM               PIC  9(35).
            02 MOV-TARJETA           PIC  9(16).
@@ -32,7 +33,6 @@
            02 MOV-CONCEPTO          PIC  X(35).
            02 MOV-SALDOPOS-ENT      PIC  S9(9).
            02 MOV-SALDOPOS-DEC      PIC   9(2).
-
 
        WORKING-STORAGE SECTION.
        77 FSM                       PIC   X(2).
@@ -82,11 +82,8 @@
            05 SALDO-DEC LINE 12 COL 42 PIC 99 FROM MOV-SALDOPOS-DEC.
            05 MONEDA LINE 12 COL 45 VALUE "EUR".
 
-
-
        PROCEDURE DIVISION USING TNUM.
        IMPRIMIR-CABECERA.
-
            SET ENVIRONMENT 'COB_SCREEN_EXCEPTIONS' TO 'Y'.
 
            DISPLAY BLANK-SCREEN.
@@ -117,7 +114,6 @@
                    GO TO PSYS-ERR.
 
            MOVE 0 TO LAST-MOV-NUM.
-
 
        LECTURA-MOV.
            READ F-MOVIMIENTOS NEXT RECORD AT END GO LAST-MOV-FOUND.
@@ -159,7 +155,6 @@
            GO TO EXIT-ENTER.
 
        PSYS-ERR.
-
            CLOSE F-MOVIMIENTOS.
 
            PERFORM IMPRIMIR-CABECERA THRU IMPRIMIR-CABECERA.

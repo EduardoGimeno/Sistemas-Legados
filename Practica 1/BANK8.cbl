@@ -20,7 +20,6 @@
            RECORD KEY IS ESP-NUM
            FILE STATUS IS FSE.
 
-
        DATA DIVISION.
        FILE SECTION.
        FD F-MOVIMIENTOS.
@@ -53,7 +52,6 @@
            02 ESP-DISP              PIC   9(7).
            02 ESP-PRECIO-ENT        PIC   9(4).
            02 ESP-PRECIO-DEC        PIC   9(2).
-
 
        WORKING-STORAGE SECTION.
        77 FSM                       PIC   X(2).
@@ -107,7 +105,6 @@
        77 SALDO-POST-ENT            PIC  S9(9).
        77 SALDO-POST-DEC            PIC   9(2).
 
-
        01 TABLA.
            05 REGISTROS-EN-PANTALLA PIC  9(35) OCCURS 15 TIMES.
 
@@ -120,7 +117,6 @@
 
        LINKAGE SECTION.
        77 TNUM                      PIC  9(16).
-
 
        SCREEN SECTION.
        01 BLANK-SCREEN.
@@ -230,10 +226,8 @@
            05 FILLER SIGN IS LEADING SEPARATE LINE 12 COL 47
                PIC S9(9) FROM SALDO-POST-ENT.
 
-
        PROCEDURE DIVISION USING TNUM.
        IMPRIMIR-CABECERA.
-
            SET ENVIRONMENT 'COB_SCREEN_EXCEPTIONS' TO 'Y'
            SET ENVIRONMENT 'COB_SCREEN_ESC'        TO 'Y'
 
@@ -295,7 +289,6 @@
                MOVE MOV-SALDOPOS-DEC TO SALDO-USER-DEC
            END-IF.
 
-
        PLECTURA-ESP.
            DISPLAY "NUM" LINE 9 COL 2.
            DISPLAY "|" LINE 9 COL 6.
@@ -318,7 +311,6 @@
            IF FSE <> 00
                GO TO PSYS-ERR.
 
-
        LEER-PRIMEROS.
            READ F-ESPECTACULOS NEXT RECORD AT END GO WAIT-ORDER.
                MOVE 1 TO ESP-VALIDO.
@@ -340,7 +332,6 @@
                GO TO LEER-PRIMEROS.
 
        WAIT-ORDER.
-
            ACCEPT ACCEPT-COMPRA-ENTRADAS ON EXCEPTION
 
               IF ESC-PRESSED THEN
@@ -663,7 +654,6 @@
        READ-MOVIMIENTO.
            READ F-MOVIMIENTOS INVALID KEY GO TO PSYS-ERR.
 
-
        MOSTRAR-ESPECTACULO.
 
            MOVE FUNCTION MOD(LINEA-ESP-ACTUAL, 2)
@@ -675,9 +665,7 @@
                DISPLAY FILA-ESPECTACULO-IMPAR
            END-IF.
 
-
        FILTRADO.
-
            COMPUTE FECHA-ESP-FILTRO = (ESP-ANO * 10000)
                                       + (ESP-MES * 100)
                                       + ESP-DIA.
@@ -688,4 +676,6 @@
 
            IF FECHA-ACTUAL > FECHA-ESP-FILTRO
                MOVE 0 TO ESP-VALIDO.
+
        END PROGRAM BANK8.
+

@@ -20,7 +20,6 @@
            RECORD KEY IS MOV-NUM
            FILE STATUS IS FSM.
 
-
        DATA DIVISION.
        FILE SECTION.
        FD TARJETAS
@@ -44,7 +43,6 @@
            02 MOV-CONCEPTO         PIC  X(35).
            02 MOV-SALDOPOS-ENT     PIC  S9(9).
            02 MOV-SALDOPOS-DEC     PIC   9(2).
-
 
        WORKING-STORAGE SECTION.
        77 FST                      PIC   X(2).
@@ -166,7 +164,6 @@
            05 FILLER LINE 10 COL 41 VALUE ",".
            05 FILLER LINE 10 COL 42 PIC 99 FROM MOV-SALDOPOS-DEC.
            05 FILLER LINE 10 COL 45 VALUE "EUR".
-
 
        PROCEDURE DIVISION USING TNUM.
        INICIO.
@@ -445,9 +442,16 @@
                    MOVE 1 TO HOY.
            
            IF ELECCION = 2
-               MOVE DIA-TRANSFERENCIA-MENSUAL TO DIA
-               MOVE 0 TO MES
-               MOVE 0 TO ANO
+               IF DIA > DIA-TRANSFERENCIA-MENSUAL
+                   IF MES = 12
+                       MOVE 1 TO MES
+                       ADD 1 TO ANO
+                       MOVE DIA-TRANSFERENCIA-MENSUAL TO DIA
+                   ELSE
+                       ADD 1 TO MES
+                       MOVE DIA-TRANSFERENCIA-MENSUAL TO DIA
+               ELSE
+                   MOVE DIA-TRANSFERENCIA-MENSUAL TO DIA
            ELSE
                MOVE DIA-TRANSFERENCIA-PUNTUAL TO DIA
                MOVE MES-TRANSFERENCIA-PUNTUAL TO MES
@@ -552,4 +556,6 @@
                     BACKGROUND-COLOR IS RED.
            DISPLAY "Enter - Salir" LINE 24 COL 33.
            GO TO EXIT-ENTER.
+
 	   END PROGRAM BANK6.
+

@@ -14,7 +14,6 @@
            RECORD KEY IS MOV-NUM
            FILE STATUS IS FSM.
 
-
        DATA DIVISION.
        FILE SECTION.
        FD F-MOVIMIENTOS
@@ -26,11 +25,14 @@
            02 MOV-ANO               PIC   9(4).
            02 MOV-MES               PIC   9(2).
            02 MOV-DIA               PIC   9(2).
+           02 MOV-HOR              PIC   9(2).
+           02 MOV-MIN              PIC   9(2).
+           02 MOV-SEG              PIC   9(2).
            02 MOV-IMPORTE-ENT       PIC  S9(7).
            02 MOV-IMPORTE-DEC       PIC   9(2).
            02 MOV-CONCEPTO          PIC  X(35).
-           02 MOV-PERIODICIDAD      PIC    9(1).
-
+           02 MOV-SALDOPOS-ENT     PIC  S9(9).
+           02 MOV-SALDOPOS-DEC     PIC   9(2).
 
        WORKING-STORAGE SECTION.
        77 FSM                       PIC   X(2).
@@ -88,9 +90,15 @@
        77 ITERACIONES               PIC   9(2).
        77 COPIA-MOV                 PIC  9(35).
 
+       77 MSJ-ORD                  PIC  X(35) VALUE "Transferimos".
+       77 MSJ-ORD-MENSUAL          PIC  X(35) 
+           VALUE "Transferimos mensual".
+       77 MSJ-DST                  PIC  X(35) VALUE "Nos transfieren".
+       77 MSJ-DST-MENSUAL          PIC  X(35) 
+           VALUE "Nos transfieren mensual".
+
        LINKAGE SECTION.
        77 TNUM                      PIC  9(16).
-
 
        SCREEN SECTION.
        01 BLANK-SCREEN.
@@ -111,7 +119,6 @@
                LINE 13 COL 56 PIC 9(4) USING ANO2-USUARIO.
 
        01 FILA-MOVIMIENTO-PAR.
-
            05 MOV-DIA-PAR LINE LINEA-MOV-ACTUAL COL 02
                FOREGROUND-COLOR YELLOW PIC 99 FROM MOV-DIA.
            05 SEPARADOR-PAR-1 LINE LINEA-MOV-ACTUAL COL 04
@@ -137,8 +144,13 @@
                FOREGROUND-COLOR YELLOW PIC 99 FROM MOV-IMPORTE-DEC.
            05 SEPARADOR-7-PAR LINE LINEA-MOV-ACTUAL COL 66
                FOREGROUND-COLOR YELLOW PIC A FROM "|".
-           05 MOV-PERIODIDICDAD-PAR LINE LINEA-MOV-ACTUAL COL 78
-               FOREGROUND-COLOR YELLOW PIC 99 FROM MOV-PERIODICIDAD.
+           05 MOV-SALDOPOS-ENT-PAR SIGN IS LEADING SEPARATE
+               LINE LINEA-MOV-ACTUAL COL 67
+               FOREGROUND-COLOR YELLOW PIC S9(7) FROM MOV-SALDOPOS-ENT.
+           05 SEPARADOR-8-PAR LINE LINEA-MOV-ACTUAL COL 75
+               FOREGROUND-COLOR YELLOW PIC A FROM ",".
+           05 MOV-SALDOPOS-DEC-PAR LINE LINEA-MOV-ACTUAL COL 76
+               FOREGROUND-COLOR YELLOW PIC 99 FROM MOV-SALDOPOS-DEC.
 
        01 FILA-MOVIMIENTO-IMPAR.
            05 MOV-DIA-IMPAR LINE LINEA-MOV-ACTUAL COL 02
@@ -167,13 +179,17 @@
                PIC 99 FROM MOV-IMPORTE-DEC.
            05 SEPARADOR-7-IMPAR LINE LINEA-MOV-ACTUAL COL 66
                PIC A FROM "|".
-           05 MOV-PERIODIDICAD-IMPAR LINE LINEA-MOV-ACTUAL COL 78
-               PIC 99 FROM MOV-PERIODICIDAD.
-
+           05 MOV-SALDOPOS-ENT-IMPAR
+               SIGN IS LEADING SEPARATE
+               LINE LINEA-MOV-ACTUAL COL 67
+               PIC S9(7) FROM MOV-SALDOPOS-ENT.
+           05 SEPARADOR-8-IMPAR LINE LINEA-MOV-ACTUAL COL 75
+               PIC A FROM ",".
+           05 MOV-SALDOPOS-DEC-IMPAR LINE LINEA-MOV-ACTUAL COL 76
+               PIC 99 FROM MOV-SALDOPOS-DEC.
 
        PROCEDURE DIVISION USING TNUM.
        IMPRIMIR-CABECERA.
-
            SET ENVIRONMENT 'COB_SCREEN_EXCEPTIONS' TO 'Y'
            SET ENVIRONMENT 'COB_SCREEN_ESC'        TO 'Y'
 
@@ -194,7 +210,6 @@
            DISPLAY MINUTOS LINE 4 COL 47.
 
        PCONSULTA-MOV.
-
            INITIALIZE DIA1-USUARIO.
            INITIALIZE MES1-USUARIO.
            INITIALIZE ANO1-USUARIO.
@@ -256,7 +271,6 @@
            MOVE 0 TO MOV-EN-PANTALLA.
            MOVE 7 TO LINEA-MOV-ACTUAL.
 
-
        LEER-PRIMEROS.
            READ F-MOVIMIENTOS PREVIOUS RECORD AT END GO WAIT-ORDER.
                MOVE 1 TO MOV-VALIDO.
@@ -277,7 +291,6 @@
                GO TO LEER-PRIMEROS.
 
        WAIT-ORDER.
-
            ACCEPT PRESSED-KEY ON EXCEPTION
 
               IF ESC-PRESSED THEN
@@ -398,7 +411,7 @@
            END-PERFORM.
 
        READ-MOVIMIENTO.
-           READ F-MOVIMIENTOS.
+           READ F-MOVIMIENTOS INVALID KEY GO TO PSYS-ERR.
 
        PSYS-ERR.
            CLOSE F-MOVIMIENTOS.
@@ -419,15 +432,35 @@
            ELSE
                GO TO EXIT-ENTER.
 
-
        FILTRADO.
-
            IF TNUM NOT = MOV-TARJETA
                MOVE 0 TO MOV-VALIDO.
 
-          
-       MOSTRAR-MOVIMIENTO.
+           IF (MOV-CONCEPTO <> MSJ-ORD) 
+               AND (MOV-CONCEPTO <> MSJ-ORD-MENSUAL)
+               AND (MOV-CONCEPTO <> MSJ-DST)
+               AND (MOV-CONCEPTO <> MSJ-DST-MENSUAL)
+                   MOVE 0 TO MOV-VALIDO.
 
+           COMPUTE FECHA-MIN = (ANO1-USUARIO * 10000)
+                               + (MES1-USUARIO * 100)
+                               + DIA1-USUARIO.
+
+           COMPUTE FECHA-MOV = (MOV-ANO * 10000)
+                               + (MOV-MES * 100)
+                               + MOV-DIA.
+
+           COMPUTE FECHA-MAX = (ANO2-USUARIO * 10000)
+                               + (MES2-USUARIO * 100)
+                               + DIA2-USUARIO.
+
+           IF FECHA-MIN > FECHA-MOV
+               MOVE 0 TO MOV-VALIDO.
+
+           IF FECHA-MAX < FECHA-MOV
+               MOVE 0 TO MOV-VALIDO.
+         
+       MOSTRAR-MOVIMIENTO.
            MOVE FUNCTION MOD(LINEA-MOV-ACTUAL, 2)
                TO MODULO-LIN-ACTUAL.
 

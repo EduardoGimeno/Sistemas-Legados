@@ -14,7 +14,6 @@
            RECORD KEY IS MOV-NUM
            FILE STATUS IS FSM.
 
-
        DATA DIVISION.
        FILE SECTION.
        FD F-MOVIMIENTOS.
@@ -32,7 +31,6 @@
            02 MOV-CONCEPTO          PIC  X(35).
            02 MOV-SALDOPOS-ENT      PIC  S9(9).
            02 MOV-SALDOPOS-DEC      PIC   9(2).
-
 
        WORKING-STORAGE SECTION.
        77 FSM                       PIC   X(2).
@@ -86,12 +84,9 @@
        LINKAGE SECTION.
        77 TNUM                     PIC  9(16).
 
-
-
        SCREEN SECTION.
        01 BLANK-SCREEN.
            05 FILLER LINE 1 BLANK SCREEN BACKGROUND-COLOR BLACK.
-
 
        01 ENTRADA-USUARIO.
            05 FILLER BLANK ZERO AUTO UNDERLINE
@@ -115,18 +110,13 @@
            05 FILLER LINE 11 COL 53 PIC 99 FROM SALDO-USUARIO-DEC.
            05 FILLER LINE 11 COL 56 VALUE "EUR".
 
-
-
-
        PROCEDURE DIVISION USING TNUM.
        IMPRIMIR-CABECERA.
-
            SET ENVIRONMENT 'COB_SCREEN_EXCEPTIONS' TO 'Y'.
 
            DISPLAY BLANK-SCREEN.
            DISPLAY "Cajero Automatico UnizarBank" LINE 2 COL 26
                WITH FOREGROUND-COLOR IS 1.
-
 
            MOVE FUNCTION CURRENT-DATE TO CAMPOS-FECHA.
 
@@ -138,9 +128,6 @@
            DISPLAY HORAS LINE 4 COL 44.
            DISPLAY ":" LINE 4 COL 46.
            DISPLAY MINUTOS LINE 4 COL 47.
-
-
-
 
        CONSULTA-ULTIMO-MOVIMIENTO.
            OPEN INPUT F-MOVIMIENTOS.
@@ -169,9 +156,6 @@
        LAST-MOV-FOUND.
            CLOSE F-MOVIMIENTOS.
 
-
-
-
        CONSULTA-SALDO-USUARIO SECTION.
            OPEN INPUT F-MOVIMIENTOS.
            IF FSM <> 00
@@ -179,7 +163,6 @@
 
            MOVE 0 TO LAST-USER-MOV-NUM.
            MOVE 0 TO MOV-NUM.
-
 
        LECTURA-MOV-USER.
            READ F-MOVIMIENTOS NEXT RECORD
@@ -215,9 +198,6 @@
 
            CLOSE F-MOVIMIENTOS.
 
-
-
-
        PANTALLA-INGRESO SECTION.
            INITIALIZE EURENT-USUARIO.
            INITIALIZE EURDEC-USUARIO.
@@ -249,9 +229,6 @@
                                      + (BILLETE50-USUARIO * 50 * 100).	   
            ADD CENT-IMPOR-USER TO CENT-ACUMULADOR.
 
-
-
-
        INSERTAR-MOVIMIENTO SECTION.
            OPEN I-O F-MOVIMIENTOS.
            IF FSM <> 00
@@ -262,7 +239,10 @@
            COMPUTE SALDO-USUARIO-ENT = (CENT-SALDO-USER / 100).
            MOVE FUNCTION MOD(CENT-SALDO-USER, 100)
                TO SALDO-USUARIO-DEC.
-
+           COMPUTE EURENT-USUARIO = (BILLETE10-USUARIO * 10)
+                                     + (BILLETE20-USUARIO * 20)
+                                     + (BILLETE50-USUARIO * 50).
+           MOVE 0 TO EURDEC-USUARIO.
 
        ESCRITURA.
            ADD 1 TO LAST-MOV-NUM.
@@ -289,9 +269,6 @@
 
            GO TO PANTALLA-INGRESO.
 
-
-
-
        PANT SECTION.
 
            COMPUTE EURENT-USUARIO = (CENT-ACUMULADOR / 100).
@@ -309,14 +286,11 @@
 
            DISPLAY SALDO-DISPLAY-FINAL.
 
-
            DISPLAY "Enter - Aceptar" LINE 24 COL 33.
-
 
            GO TO EXIT-ENTER.
 
        PSYS-ERR.
-
            CLOSE F-MOVIMIENTOS.
 
            PERFORM IMPRIMIR-CABECERA THRU IMPRIMIR-CABECERA.
@@ -334,4 +308,6 @@
                EXIT PROGRAM
            ELSE
                GO TO EXIT-ENTER.
+
 	   END PROGRAM BANK5.
+

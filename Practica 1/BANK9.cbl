@@ -76,8 +76,6 @@
        77 PIN-NUEVO-II             PIC  9(4).
        77 INTENTOS-CUENTA          PIC  9(1).
 
-       77 DEBUG                    PIC  9(1).
-
        LINKAGE SECTION.
        77 TNUM                     PIC  9(16).
 
@@ -104,7 +102,6 @@
            INITIALIZE PIN-NUEVO.
            INITIALIZE PIN-NUEVO-II.
            INITIALIZE INTENTOS-CUENTA.
-           INITIALIZE DEBUG.
 
            MOVE 3 TO INTENTOS-CUENTA.
 
@@ -269,4 +266,6 @@
                GO TO IMPRIMIR-CABECERA
            ELSE
                GO TO PIN-ERR-ENTER.
+
        END PROGRAM BANK9.
+

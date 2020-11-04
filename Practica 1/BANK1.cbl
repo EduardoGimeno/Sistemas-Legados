@@ -20,7 +20,6 @@
            RECORD KEY IS INUM
            FILE STATUS IS FSI.
 
-
        DATA DIVISION.
        FILE SECTION.
        FD TARJETAS
@@ -36,7 +35,6 @@
        01 INTENTOSREG.
            02 INUM      PIC 9(16).
            02 IINTENTOS PIC 9(1).
-
 
        WORKING-STORAGE SECTION.
        77 FST                      PIC  X(2).
@@ -75,7 +73,6 @@
        77 PIN-INTRODUCIDO          PIC  9(4).
        77 CHOICE                   PIC  9(1).
 
-
        SCREEN SECTION.
        01 BLANK-SCREEN.
            05 FILLER LINE 1 BLANK SCREEN BACKGROUND-COLOR BLACK.
@@ -98,8 +95,7 @@
            DISPLAY BLANK-SCREEN.
 
            DISPLAY "Cajero Automatico UnizarBank" LINE 2 COL 26
-               WITH FOREGROUND-COLOR IS BLUE
-				    BACKGROUND-COLOR IS CYAN.
+               WITH FOREGROUND-COLOR IS 1.
 
            MOVE FUNCTION CURRENT-DATE TO CAMPOS-FECHA.
 
@@ -112,13 +108,11 @@
            DISPLAY ":" LINE 4 COL 46.
            DISPLAY MINUTOS LINE 4 COL 47.
 
-
        P1.
            DISPLAY "Bienvenido a UnizarBank" LINE 8 COL 28.
            DISPLAY "Por favor, introduzca la tarjeta" LINE 10 COL 18.
            DISPLAY "para operar" LINE 10 COL 51.
            DISPLAY "Enter - Aceptar" LINE 24 COL 33.
-
 
        P1-ENTER.
            ACCEPT PRESSED-KEY AT LINE 24 COL 80
@@ -126,7 +120,6 @@
                GO TO P2
            ELSE
                GO TO P1-ENTER.
-
 
        P2.
            PERFORM IMPRIMIR-CABECERA THRU IMPRIMIR-CABECERA.
@@ -221,7 +214,6 @@
            GO TO PMENU.
 
        PSYS-ERR.
-
            CLOSE TARJETAS.
            CLOSE INTENTOS.
 
@@ -236,7 +228,6 @@
            GO TO PINT-ERR-ENTER.
 
        PINT-ERR.
-
            CLOSE TARJETAS.
            CLOSE INTENTOS.
 
