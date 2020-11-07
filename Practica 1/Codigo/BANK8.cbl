@@ -95,7 +95,7 @@
        77 IMPORTE-ENTRADAS-CENT     PIC   9(8).
        77 IMPORTE-ENTRADAS-ENT      PIC  S9(6).
        77 IMPORTE-ENTRADAS-DEC      PIC   9(2).
-       77 ENTRAD-CONCEPTO           PIC  X(40).
+       77 ENTRAD-CONCEPTO           PIC  X(35).
 
        77 ESP-EN-PANTALLA           PIC   9(2).
        77 LINEA-ESP-ACTUAL          PIC   9(2).
@@ -228,11 +228,14 @@
 
        PROCEDURE DIVISION USING TNUM.
        IMPRIMIR-CABECERA.
+           
            SET ENVIRONMENT 'COB_SCREEN_EXCEPTIONS' TO 'Y'
            SET ENVIRONMENT 'COB_SCREEN_ESC'        TO 'Y'
 
            INITIALIZE MOVIMIENTO-REG.
            INITIALIZE ESPECTACULO-REG.
+           INITIALIZE USER-NUM-ENTRADAS.
+           INITIALIZE USER-NUM-ESPECT.
 
            DISPLAY BLANK-SCREEN.
            DISPLAY "Cajero Automatico UnizarBank" LINE 2 COL 26
@@ -245,14 +248,14 @@
            DISPLAY MES LINE 4 COL 35.
            DISPLAY "-" LINE 4 COL 37.
            DISPLAY ANO LINE 4 COL 38.
-           DISPLAY HORAS LINE 4 COL 38.
+           DISPLAY HORAS LINE 4 COL 44.
            DISPLAY ":" LINE 4 COL 46.
            DISPLAY MINUTOS LINE 4 COL 47.
 
            DISPLAY "Compra de entradas de espectaculos" LINE 6 COL 22.
 
        CONSULTA-SALDO.
-           OPEN INPUT F-MOVIMIENTOS.
+           OPEN I-O F-MOVIMIENTOS.
            IF FSM = 35
                OPEN OUTPUT F-MOVIMIENTOS
                IF FSM = 0
@@ -265,7 +268,6 @@
 
            MOVE 0 TO LAST-USER-MOV-NUM.
            MOVE 0 TO LAST-MOV-NUM.
-
 
        LECTURA-MOV.
            READ F-MOVIMIENTOS NEXT RECORD AT END GO
@@ -314,8 +316,6 @@
        LEER-PRIMEROS.
            READ F-ESPECTACULOS NEXT RECORD AT END GO WAIT-ORDER.
                MOVE 1 TO ESP-VALIDO.
-
-               PERFORM FILTRADO THRU FILTRADO.
 
                IF ESP-VALIDO = 1
                    ADD 1 TO LINEA-ESP-ACTUAL
@@ -448,7 +448,7 @@
            MULTIPLY -1 BY IMPORTE-ENTRADAS-ENT.
 
            MOVE FUNCTION
-               CONCATENATE ("Compra entradas UnizarBank cod. ",
+               CONCATENATE ("Compra entradas cod. ",
                ESP-NUM) TO ENTRAD-CONCEPTO.
 
            MOVE LAST-MOV-NUM         TO MOV-NUM.
@@ -461,7 +461,7 @@
            MOVE SEGUNDOS             TO MOV-SEG.
            MOVE IMPORTE-ENTRADAS-ENT TO MOV-IMPORTE-ENT.
            MOVE IMPORTE-ENTRADAS-DEC TO MOV-IMPORTE-DEC.
-           MOVE ESP-DESCR            TO MOV-CONCEPTO.
+           MOVE ENTRAD-CONCEPTO      TO MOV-CONCEPTO.
            MOVE SALDO-POST-ENT       TO MOV-SALDOPOS-ENT.
            MOVE SALDO-POST-DEC       TO MOV-SALDOPOS-DEC.
 
@@ -542,7 +542,6 @@
                AT END GO WAIT-ORDER.
 
                MOVE 1 TO ESP-VALIDO.
-               PERFORM FILTRADO THRU FILTRADO.
 
                IF ESP-VALIDO = 1
                    MOVE 2 TO ESP-VALIDO
@@ -555,7 +554,6 @@
                AT END GO WAIT-ORDER.
 
                MOVE 1 TO ESP-VALIDO.
-               PERFORM FILTRADO THRU FILTRADO.
 
                IF ESP-VALIDO = 1
                    MOVE 3 TO ESP-VALIDO
@@ -650,7 +648,6 @@
            ELSE
                GO TO EXIT-ENTER.
 
-
        READ-MOVIMIENTO.
            READ F-MOVIMIENTOS INVALID KEY GO TO PSYS-ERR.
 
@@ -664,18 +661,6 @@
            ELSE
                DISPLAY FILA-ESPECTACULO-IMPAR
            END-IF.
-
-       FILTRADO.
-           COMPUTE FECHA-ESP-FILTRO = (ESP-ANO * 10000)
-                                      + (ESP-MES * 100)
-                                      + ESP-DIA.
-
-           COMPUTE FECHA-ACTUAL = (ANO * 10000)
-                                  + (MES * 100)
-                                  + DIA.
-
-           IF FECHA-ACTUAL > FECHA-ESP-FILTRO
-               MOVE 0 TO ESP-VALIDO.
 
        END PROGRAM BANK8.
 

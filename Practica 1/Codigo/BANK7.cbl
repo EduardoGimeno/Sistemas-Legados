@@ -1,5 +1,5 @@
 	   IDENTIFICATION DIVISION.
-       PROGRAM-ID. BANK3.
+       PROGRAM-ID. BANK7.
 
        ENVIRONMENT DIVISION.
        CONFIGURATION SECTION.
@@ -25,14 +25,14 @@
            02 MOV-ANO               PIC   9(4).
            02 MOV-MES               PIC   9(2).
            02 MOV-DIA               PIC   9(2).
-           02 MOV-HOR               PIC   9(2).
-           02 MOV-MIN               PIC   9(2).
-           02 MOV-SEG               PIC   9(2).
+           02 MOV-HOR              PIC   9(2).
+           02 MOV-MIN              PIC   9(2).
+           02 MOV-SEG              PIC   9(2).
            02 MOV-IMPORTE-ENT       PIC  S9(7).
            02 MOV-IMPORTE-DEC       PIC   9(2).
            02 MOV-CONCEPTO          PIC  X(35).
-           02 MOV-SALDOPOS-ENT      PIC  S9(9).
-           02 MOV-SALDOPOS-DEC      PIC   9(2).
+           02 MOV-SALDOPOS-ENT     PIC  S9(9).
+           02 MOV-SALDOPOS-DEC     PIC   9(2).
 
        WORKING-STORAGE SECTION.
        77 FSM                       PIC   X(2).
@@ -74,17 +74,9 @@
        77 MES2-USUARIO              PIC   9(2).
        77 ANO2-USUARIO              PIC   9(4).
 
-       77 EURENT1-USUARIO           PIC  S9(7).
-       77 EURDEC1-USUARIO           PIC   9(2).
-       77 EURENT2-USUARIO           PIC  S9(7).
-       77 EURDEC2-USUARIO           PIC   9(2).
-
        77 FECHA-MIN                 PIC   9(8).
        77 FECHA-MOV                 PIC   9(8).
        77 FECHA-MAX                 PIC   9(8).
-       77 CENT-MIN                  PIC  S9(9).
-       77 CENT-MOV                  PIC  S9(9).
-       77 CENT-MAX                  PIC  S9(9).
 
        77 MOV-EN-PANTALLA           PIC   9(2).
        77 LINEA-MOV-ACTUAL          PIC   9(2).
@@ -98,7 +90,12 @@
        77 ITERACIONES               PIC   9(2).
        77 COPIA-MOV                 PIC  9(35).
 
-       77 AUX                       PIC 9(7).
+       77 MSJ-ORD                  PIC  X(35) VALUE "Transferimos".
+       77 MSJ-ORD-MENSUAL          PIC  X(35) 
+           VALUE "Transferimos mensual".
+       77 MSJ-DST                  PIC  X(35) VALUE "Nos transfieren".
+       77 MSJ-DST-MENSUAL          PIC  X(35) 
+           VALUE "Nos transfieren mensual".
 
        LINKAGE SECTION.
        77 TNUM                      PIC  9(16).
@@ -109,27 +106,17 @@
 
        01 FILTRO-MOVIMIENTOS.
            05 DIA-MIN BLANK ZERO AUTO UNDERLINE
-               LINE 17 COL 33 PIC 9(2) USING DIA1-USUARIO.
+               LINE 13 COL 37 PIC 9(2) USING DIA1-USUARIO.
            05 MES-MIN BLANK ZERO AUTO UNDERLINE
-               LINE 17 COL 36 PIC 9(2) USING MES1-USUARIO.
+               LINE 13 COL 40 PIC 9(2) USING MES1-USUARIO.
            05 ANO-MIN BLANK ZERO AUTO UNDERLINE
-               LINE 17 COL 39 PIC 9(4) USING ANO1-USUARIO.
-           05 DIA-MAX BLANK ZERO AUTO UNDERLINE
-               LINE 19 COL 33 PIC 9(2) USING DIA2-USUARIO.
+               LINE 13 COL 43 PIC 9(4) USING ANO1-USUARIO.
+           05 DIA-MAX BLANK ZERO BEEP AUTO UNDERLINE
+               LINE 13 COL 50 PIC 9(2) USING DIA2-USUARIO.
            05 MES-MAX BLANK ZERO AUTO UNDERLINE
-               LINE 19 COL 36 PIC 9(2) USING MES2-USUARIO.
+               LINE 13 COL 53 PIC 9(2) USING MES2-USUARIO.
            05 ANO-MAX BLANK ZERO AUTO UNDERLINE
-               LINE 19 COL 39 PIC 9(4) USING ANO2-USUARIO.
-           05 EUR-ENT-MIN BLANK ZERO AUTO UNDERLINE
-               SIGN IS LEADING SEPARATE
-               LINE 13 COL 35 PIC -9(7) USING EURENT1-USUARIO.
-           05 EUR-DEC-MIN BLANK ZERO AUTO UNDERLINE
-               LINE 13 COL 44 PIC 9(2) USING EURDEC1-USUARIO.
-           05 EUR-ENT-MAX BLANK ZERO AUTO UNDERLINE
-               SIGN IS LEADING SEPARATE
-               LINE 15 COL 35 PIC -9(7) USING EURENT2-USUARIO.
-           05 EUR-DEC-MAX BLANK ZERO UNDERLINE
-               LINE 15 COL 44 PIC 9(2) USING EURDEC2-USUARIO.
+               LINE 13 COL 56 PIC 9(4) USING ANO2-USUARIO.
 
        01 FILA-MOVIMIENTO-PAR.
            05 MOV-DIA-PAR LINE LINEA-MOV-ACTUAL COL 02
@@ -148,7 +135,7 @@
                FOREGROUND-COLOR YELLOW PIC A FROM ":".
            05 MOV-MIN-PAR LINE LINEA-MOV-ACTUAL COL 16
                FOREGROUND-COLOR YELLOW PIC 99 FROM MOV-MIN.
-           05 SEPARADOR-PAR-4 LINE LINEA-MOV-ACTUAL COL 18
+           05 SEPARADOR-PAR-2 LINE LINEA-MOV-ACTUAL COL 18
                FOREGROUND-COLOR YELLOW PIC A FROM "|".
            05 MOV-CONCEPTO-PAR LINE LINEA-MOV-ACTUAL COL 19
                FOREGROUND-COLOR YELLOW PIC X(35) FROM MOV-CONCEPTO.
@@ -165,11 +152,10 @@
                FOREGROUND-COLOR YELLOW PIC A FROM "|".
            05 MOV-SALDOPOS-ENT-PAR SIGN IS LEADING SEPARATE
                LINE LINEA-MOV-ACTUAL COL 67
-               FOREGROUND-COLOR YELLOW PIC S9(9)
-               FROM MOV-SALDOPOS-ENT.
-           05 SEPARADOR-8-PAR LINE LINEA-MOV-ACTUAL COL 77
+               FOREGROUND-COLOR YELLOW PIC S9(7) FROM MOV-SALDOPOS-ENT.
+           05 SEPARADOR-8-PAR LINE LINEA-MOV-ACTUAL COL 75
                FOREGROUND-COLOR YELLOW PIC A FROM ",".
-           05 MOV-SALDOPOS-DEC-PAR LINE LINEA-MOV-ACTUAL COL 78
+           05 MOV-SALDOPOS-DEC-PAR LINE LINEA-MOV-ACTUAL COL 76
                FOREGROUND-COLOR YELLOW PIC 99 FROM MOV-SALDOPOS-DEC.
 
        01 FILA-MOVIMIENTO-IMPAR.
@@ -208,10 +194,10 @@
            05 MOV-SALDOPOS-ENT-IMPAR
                SIGN IS LEADING SEPARATE
                LINE LINEA-MOV-ACTUAL COL 67
-               PIC S9(9) FROM MOV-SALDOPOS-ENT.
-           05 SEPARADOR-8-IMPAR LINE LINEA-MOV-ACTUAL COL 77
+               PIC S9(7) FROM MOV-SALDOPOS-ENT.
+           05 SEPARADOR-8-IMPAR LINE LINEA-MOV-ACTUAL COL 75
                PIC A FROM ",".
-           05 MOV-SALDOPOS-DEC-IMPAR LINE LINEA-MOV-ACTUAL COL 78
+           05 MOV-SALDOPOS-DEC-IMPAR LINE LINEA-MOV-ACTUAL COL 76
                PIC 99 FROM MOV-SALDOPOS-DEC.
 
        PROCEDURE DIVISION USING TNUM.
@@ -224,6 +210,7 @@
                WITH FOREGROUND-COLOR IS 1.
 
            MOVE FUNCTION CURRENT-DATE TO CAMPOS-FECHA.
+           MOVE FUNCTION CURRENT-DATE TO CAMPOS-FECHA.
 
            DISPLAY DIA LINE 4 COL 32.
            DISPLAY "-" LINE 4 COL 34.
@@ -235,17 +222,6 @@
            DISPLAY MINUTOS LINE 4 COL 47.
 
        PCONSULTA-MOV.
-           OPEN INPUT F-MOVIMIENTOS.
-           IF FSM = 35
-               OPEN OUTPUT F-MOVIMIENTOS
-               IF FSM = 0
-                   GO TO PCONSULTA-MOV
-               ELSE
-                   GO TO PCONSULTA-MOV
-           ELSE
-               IF FSM <> 00
-                   GO TO PSYS-ERR.
-
            INITIALIZE DIA1-USUARIO.
            INITIALIZE MES1-USUARIO.
            INITIALIZE ANO1-USUARIO.
@@ -253,24 +229,18 @@
            INITIALIZE MES2-USUARIO.
            INITIALIZE ANO2-USUARIO.
 
-           INITIALIZE EURENT1-USUARIO.
-           INITIALIZE EURDEC1-USUARIO.
-           INITIALIZE EURENT2-USUARIO.
-           INITIALIZE EURDEC2-USUARIO.
 
-           DISPLAY "Se mostraran los ultimos movimientos," 
-               LINE 8 COL 10.
+           DISPLAY "Se mostraran las ultimas transferencias," 
+               LINE 8 COL 8.
            DISPLAY "de mas a menos recientes" LINE 8 COL 48.
 
            DISPLAY "Alternativamente indique un intervalo" 
-               LINE 10 COL 10.
-           DISPLAY "de fechas o cantidades" LINE 10 COL 48.
+               LINE 10 COL 8.
+           DISPLAY "de fechas" LINE 10 COL 48.
 
-           DISPLAY "Cantidad minima         .   EUR" LINE 13 COL 19.
-           DISPLAY "Cantidad maxima         .   EUR" LINE 15 COL 19.
-           DISPLAY "Fecha inicial   /  /    " LINE 17 COL 19.
-           DISPLAY "Fecha final     /  /    " LINE 19 COL 19.
-         
+           DISPLAY "Entre las fechas    y    " LINE 13 COL 8.
+      
+
            DISPLAY "Enter - Aceptar" LINE 24 COL 01.
            DISPLAY "ESC - Cancelar" LINE 24 COL 65.
 
@@ -287,16 +257,11 @@
                        MOVE 99   TO MES2-USUARIO
                        MOVE 9999 TO ANO2-USUARIO.
 
-           IF EURENT2-USUARIO = 0
-               IF EURDEC2-USUARIO = 0
-                   IF EURENT1-USUARIO = 0
-                       IF EURDEC1-USUARIO = 0
-                           MOVE 9999999  TO EURENT2-USUARIO
-                           MOVE 99       TO EURDEC2-USUARIO
-                           MOVE -9999999  TO EURENT1-USUARIO
-                           MOVE 99        TO EURDEC1-USUARIO.
+           PERFORM IMPRIMIR-CABECERA THRU IMPRIMIR-CABECERA
 
-           PERFORM IMPRIMIR-CABECERA THRU IMPRIMIR-CABECERA.
+           OPEN INPUT F-MOVIMIENTOS.
+               IF FSM <> 00
+                   GO TO PSYS-ERR.
 
        POSICIONAR-FINAL.
            READ F-MOVIMIENTOS NEXT RECORD AT END GO PLECTURA-MOV.
@@ -473,7 +438,7 @@
            DISPLAY "Enter - Aceptar" LINE 24 COL 33.
 
        EXIT-ENTER.
-           ACCEPT PRESSED-KEY
+           ACCEPT PRESSED-KEY AT LINE 24 COL 80
            IF ENTER-PRESSED
                EXIT PROGRAM
            ELSE
@@ -482,6 +447,12 @@
        FILTRADO.
            IF TNUM NOT = MOV-TARJETA
                MOVE 0 TO MOV-VALIDO.
+
+           IF (MOV-CONCEPTO <> MSJ-ORD) 
+               AND (MOV-CONCEPTO <> MSJ-ORD-MENSUAL)
+               AND (MOV-CONCEPTO <> MSJ-DST)
+               AND (MOV-CONCEPTO <> MSJ-DST-MENSUAL)
+                   MOVE 0 TO MOV-VALIDO.
 
            COMPUTE FECHA-MIN = (ANO1-USUARIO * 10000)
                                + (MES1-USUARIO * 100)
@@ -497,25 +468,10 @@
 
            IF FECHA-MIN > FECHA-MOV
                MOVE 0 TO MOV-VALIDO.
+
            IF FECHA-MAX < FECHA-MOV
                MOVE 0 TO MOV-VALIDO.
-
-           MOVE MOV-IMPORTE-ENT TO AUX.
-
-           COMPUTE CENT-MIN = (EURENT1-USUARIO * 100)
-                              + (EURDEC1-USUARIO).
-
-           COMPUTE CENT-MOV = (AUX * 100)
-                              + (MOV-IMPORTE-DEC).
-
-           COMPUTE CENT-MAX = (EURENT2-USUARIO * 100)
-                              + (EURDEC2-USUARIO).
-
-           IF CENT-MIN > CENT-MOV
-               MOVE 0 TO MOV-VALIDO.
-           IF CENT-MAX < CENT-MOV
-               MOVE 0 TO MOV-VALIDO.
-
+         
        MOSTRAR-MOVIMIENTO.
            MOVE FUNCTION MOD(LINEA-MOV-ACTUAL, 2)
                TO MODULO-LIN-ACTUAL.
@@ -523,7 +479,7 @@
            IF MODULO-LIN-ACTUAL = 0
                DISPLAY FILA-MOVIMIENTO-PAR
            ELSE
-               DISPLAY FILA-MOVIMIENTO-IMPAR.   
-                   
-	   END PROGRAM BANK3.
+               DISPLAY FILA-MOVIMIENTO-IMPAR.
+
+	   END PROGRAM BANK7.
 	   
