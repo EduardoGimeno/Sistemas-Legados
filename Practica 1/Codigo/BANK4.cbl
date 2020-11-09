@@ -8,7 +8,7 @@
 
        INPUT-OUTPUT SECTION.
        FILE-CONTROL.
-           SELECT F-MOVIMIENTOS ASSIGN TO "movimientos.ubd"
+           SELECT F-MOVIMIENTOS ASSIGN TO DISK
            ORGANIZATION IS INDEXED
            ACCESS MODE IS DYNAMIC
            RECORD KEY IS MOV-NUM
@@ -16,7 +16,9 @@
 
        DATA DIVISION.
        FILE SECTION.
-       FD F-MOVIMIENTOS.
+       FD F-MOVIMIENTOS
+           LABEL RECORD STANDARD
+           VALUE OF FILE-ID IS "movimientos.ubd".
        01 MOVIMIENTO-REG.
            02 MOV-NUM               PIC  9(35).
            02 MOV-TARJETA           PIC  9(16).

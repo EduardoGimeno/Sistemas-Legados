@@ -14,7 +14,7 @@
            RECORD KEY IS TNUM-E
            FILE STATUS IS FST.
 
-           SELECT F-MOVIMIENTOS ASSIGN TO "movimientos.ubd"
+           SELECT F-MOVIMIENTOS ASSIGN TO DISK
            ORGANIZATION IS INDEXED
            ACCESS MODE IS DYNAMIC
            RECORD KEY IS MOV-NUM
@@ -28,7 +28,9 @@
        01 TAJETAREG.
            02 TNUM-E      PIC 9(16).
            02 TPIN-E      PIC  9(4).
-       FD F-MOVIMIENTOS.
+       FD F-MOVIMIENTOS
+           LABEL RECORD STANDARD
+           VALUE OF FILE-ID IS "movimientos.ubd".
        01 MOVIMIENTO-REG.
            02 MOV-NUM              PIC  9(35).
            02 MOV-TARJETA          PIC  9(16).
