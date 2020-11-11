@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 from tkinter import *
-#tkinter es una libreria de interfaces graficas con usuario
-from api import initialize, disconnect, add_tasks, TAREA_GENERAL, TAREA_ESPECIFICA
+# tkinter es una libreria de interfaces graficas con usuario
+from api import initialize, disconnect, add_task, TASK_GENERAL, TASK_SPECIFIC, list_tasks
 
 root = Tk()
 
@@ -29,7 +29,8 @@ frameAddName.pack(side=TOP)
 frameAddDesc = Frame(frameAdd)
 frameAddDesc.pack(side=TOP)
 
-def convertir_lista_string(lista_tareas) :
+
+def convertir_lista_string(lista_tareas):
     tareas = ''
     for tarea in lista_tareas:
         id = tarea['id']
@@ -39,24 +40,25 @@ def convertir_lista_string(lista_tareas) :
         tareas += f'{id}\t{fecha}\t{nombre}\t{descripcion}\n'
     return tareas
 
+
 # Lista de tareas generales
 stringLabelListGeneral = StringVar()
 stringLabelListGeneral.set('Tareas generales')
-labelListGeneral = Label (
+labelListGeneral = Label(
     frameListGeneral,
-    textvariable = stringLabelListGeneral,
+    textvariable=stringLabelListGeneral,
     relief=RAISED
 )
 labelListGeneral.pack(side=TOP)
 textListGeneral = Text(frameListGeneral)
 textListGeneral.pack()
 
-#Lista de tareas especificas
+# Lista de tareas especificas
 stringLabelListSpecific = StringVar()
 stringLabelListSpecific.set('Tareas especificas')
-labelListSpecific = Label (
+labelListSpecific = Label(
     frameListSpecific,
-    textvariable = stringLabelListSpecific,
+    textvariable=stringLabelListSpecific,
     relief=RAISED
 )
 labelListSpecific.pack(side=TOP)
@@ -65,26 +67,27 @@ textListSpecific.pack()
 
 # Anadir tareas nuevas
 varType = IntVar()
-radioGeneral = Radiobutton(frameChooseType, text="General", variable=varType, value=TAREA_GENERAL)
-radioGeneral.pack( anchor = W, side = LEFT )
-radioSpecific = Radiobutton(frameChooseType, text="Especifica", variable=varType, value=TAREA_ESPECIFICA)
-radioSpecific.pack( anchor = W, side = RIGHT )
+radioGeneral = Radiobutton(frameChooseType, text="General", variable=varType, value=TASK_GENERAL)
+radioGeneral.pack(anchor=W, side=LEFT)
+radioSpecific = Radiobutton(frameChooseType, text="Especifica", variable=varType, value=TASK_SPECIFIC)
+radioSpecific.pack(anchor=W, side=RIGHT)
 labelAddDay = Label(frameAddDay, text="Dia")
-labelAddDay.pack( side = LEFT)
-entryAddDay = Entry(frameAddDay, bd =5)
-entryAddDay.pack(side = RIGHT)
+labelAddDay.pack(side=LEFT)
+entryAddDay = Entry(frameAddDay, bd=5)
+entryAddDay.pack(side=RIGHT)
 labelAddMonth = Label(frameAddMonth, text="Mes")
-labelAddMonth.pack( side = LEFT)
-entryAddMonth = Entry(frameAddMonth, bd =5)
-entryAddMonth.pack(side = RIGHT)
+labelAddMonth.pack(side=LEFT)
+entryAddMonth = Entry(frameAddMonth, bd=5)
+entryAddMonth.pack(side=RIGHT)
 labelAddName = Label(frameAddName, text="Nombre de la tarea")
-labelAddName.pack( side = LEFT)
-entryAddName = Entry(frameAddName, bd =5)
-entryAddName.pack(side = RIGHT)
+labelAddName.pack(side=LEFT)
+entryAddName = Entry(frameAddName, bd=5)
+entryAddName.pack(side=RIGHT)
 labelAddDesc = Label(frameAddDesc, text="Descripcion")
-labelAddDesc.pack( side = LEFT)
-entryAddDesc = Entry(frameAddDesc, bd =5)
-entryAddDesc.pack(side = RIGHT)
+labelAddDesc.pack(side=LEFT)
+entryAddDesc = Entry(frameAddDesc, bd=5)
+entryAddDesc.pack(side=RIGHT)
+
 
 def callbackAddTask():
     add_task(
@@ -96,13 +99,13 @@ def callbackAddTask():
     )
     textListGeneral.delete(1.0, END)
     textListSpecific.delete(1.0, END)
-    textListGeneral.insert(INSERT, convertir_lista_string(list_tasks(TAREA_GENERAL)))
-    textListSpecific.insert(INSERT, convertir_lista_string(list_tasks(TAREA_ESPECIFICA)))
+    textListGeneral.insert(INSERT, convertir_lista_string(list_tasks(TASK_GENERAL)))
+    textListSpecific.insert(INSERT, convertir_lista_string(list_tasks(TASK_SPECIFIC)))
 
-buttonAddTask = Button(frameAdd, text = "Add", command = callbackAddTask)
+
+buttonAddTask = Button(frameAdd, text="Add", command=callbackAddTask)
 
 buttonAddTask.pack()
-
 
 if __name__ == "__main__":
     initialize()

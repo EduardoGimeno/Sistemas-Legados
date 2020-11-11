@@ -2,11 +2,12 @@
 
 import time
 from py3270 import Emulator
+
 # https://pypi.org/project/py3270/
 ###### CONEXION WX3270 #######
 
 HOST = '155.210.152.51'
-PORT = '3270'
+PORT = '104'
 USER = 'grupo_12'
 PASSWD = 'secreto6'
 
@@ -23,77 +24,92 @@ TASK_GENERAL = 1
 TASK_SPECIFIC = 2
 MAIN_MENU = 3
 
-em = Emulator()
+em = Emulator(visible=True)
+
 
 ###### FUNCIONES PROGRAMA ######
 
-#espera anes de cada ejecucion de funcon para que no haya
-#perdida de datos
+# espera antes de cada ejecucion de funcion para que no haya
+# perdida de datos
 def wait_screen():
     em.wait_for_field()
     time.sleep(DELAY)
 
+
 def waiter(func):
     def inner(*args, **kwargs):
         wait_screen()
-        res = func (*args, **kwargs)
+        res = func(*args, **kwargs)
         return res
 
     return inner
+
+
 def connect():
     em.connect(f'{HOST, PORT}')
+
 
 def disconnect():
     em.terminate()
 
+
 @waiter
 def login():
-    em.fill_field(3,18,USER,8)
-    em.fill_field(5,18,PASSWD,8)
+    em.fill_field(3, 18, USER, 8)
+    em.fill_field(5, 18, PASSWD, 8)
     em.send_enter()
+
 
 @waiter
 def exec_task():
-    em.fill_field(3,15, 'tareas.c', 8)
+    em.fill_field(3, 15, 'tareas.c', 8)
     em.send_enter()
+
 
 @waiter
 def print_screen():
-    print('*~'*40)
+    print('*~' * 40)
     for i in range(SCREEN_HEIGTH):
-        print(em.string_get(i+1,1,SCREEN_WIDTH))
-    print('*~'*40)
+        print(em.string_get(i + 1, 1, SCREEN_WIDTH))
+    print('*~' * 40)
+
 
 def wait_compile():
-    while em.string_get(43,71,7) != 'Reading':
+    while em.string_get(43, 71, 7) != 'Reading':
         pass
+
 
 @waiter
 def clean_screen():
-    while em.string_get(43,71,7) != 'More...':
+    while em.string_get(43, 71, 7) != 'More...':
         em.send_enter()
         wait_screen()
     em.send_enter()
 
+
 def pre_cleaner(func):
-    ef inner(*args, **kwargs):
+    def inner(*args, **kwargs):
         clean_screen()
-        res = func (*args, **kwargs)
+        res = func(*args, **kwargs)
         return res
+
     return inner
+
 
 @waiter
 def input_option(input):
     em.send_string(f'{input}')
     em.send_enter()
 
+
 def initialize():
     connect()
-    enter()
+    em.send_enter()
     login()
-    enter()
+    em.send_enter()
     exec_task()
     wait_compile()
+
 
 # Por simplicidad, cada vez que se termina una acción, se vuelve
 # al menú principal
@@ -125,23 +141,23 @@ def list_tasks(task_type):
     input_option(VIEW_TASK)
     input_option(task_type)
     wait_screen()
-    
-    if em.string_get(1,1,1) == ' ':
+
+    if em.string_get(1, 1, 1) == ' ':
         first_line = 9
     else:
         first_line = 8
-        
+
     i = 1
     line = em.string_get(first_line, 1, SCREEN_WIDTH).strip()
-    
+
     while line[0:5] != 'TOTAL':
         if line[0:4] == 'TASK':
             task_list += [line]
         else:
             task_list[-1] += line
-        line = em.string_get(first_line+i, 1, SCREEN_WIDTH).strip()
+        line = em.string_get(first_line + i, 1, SCREEN_WIDTH).strip()
         i += 1
-    
+
     task_dict_list = [
         {
             'id': frags[1][:-1],
@@ -149,11 +165,12 @@ def list_tasks(task_type):
             'date': frags[3],
             'name': frags[4],
             'desc': frags[5]
-        } 
+        }
         for frags in [line.split() for line in task_list]
     ]
 
     return task_dict_list
+
 
 # Si se ejecuta el módulo directamente, prueba a insertar
 # y listar tareas
@@ -179,12 +196,12 @@ if __name__ == "__main__":
     print('Task added')
     add_task(TASK_SPECIFIC, 3, 10, 'TareaSpecific4', 'Nombre4')
     print('Tasks added')
-    g_tasks = list_tasks(TASK_GENERAL)  
-    s_tasks = list_tasks(TASK_SPECIFIC) 
+    g_tasks = list_tasks(TASK_GENERAL)
+    s_tasks = list_tasks(TASK_SPECIFIC)
     print('Showing general tasks:')
     for task in g_tasks:
-        print(task) 
+        print(task)
     print('Showing specific tasks:')
     for task in s_tasks:
-        print(task)    
+        print(task)
     disconnect()
