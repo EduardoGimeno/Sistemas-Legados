@@ -12,7 +12,7 @@ USER = 'grupo_12'
 PASSWD = 'secreto6'
 
 ###### PARAMETROS INTERFAZ GRAFICA #######
-DELAY = 0.1
+DELAY = 0.2
 SCREEN_WIDTH = 80
 SCREEN_HEIGTH = 43
 
@@ -46,7 +46,8 @@ def waiter(func):
 
 
 def connect():
-    em.connect(f'{HOST, PORT}')
+    address = HOST + ":" + PORT
+    em.connect(address)
 
 
 def disconnect():

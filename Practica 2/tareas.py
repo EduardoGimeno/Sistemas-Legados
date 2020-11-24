@@ -34,9 +34,9 @@ def convertir_lista_string(lista_tareas):
     tareas = ''
     for tarea in lista_tareas:
         id = tarea['id']
-        fecha = tarea['fecha']
-        nombre = tarea['nombre']
-        descripcion = tarea['descripcion']
+        fecha = tarea['date']
+        nombre = tarea['name']
+        descripcion = tarea['desc']
         tareas += f'{id}\t{fecha}\t{nombre}\t{descripcion}\n'
     return tareas
 
