@@ -3,206 +3,193 @@
 import time
 from py3270 import Emulator
 
-# https://pypi.org/project/py3270/
-###### CONEXION WX3270 #######
+### Parámetros generales ###
 
+# Parámetros de conexión al mainframe a través del emulador
 HOST = '155.210.152.51'
 PORT = '104'
 USER = 'grupo_12'
 PASSWD = 'secreto6'
 
-###### PARAMETROS INTERFAZ GRAFICA #######
+# Parámetros para controlar la GUI del emulador
 DELAY = 0.2
 SCREEN_WIDTH = 80
 SCREEN_HEIGTH = 43
 
-###### VARIABLES PROGRAMA ######
-
+# Parámetros para controlar la lógica del programa
 ADD_TASK = 1
 VIEW_TASK = 2
 TASK_GENERAL = 1
 TASK_SPECIFIC = 2
 MAIN_MENU = 3
 
+# Declaración del emulador
 em = Emulator(visible=True)
 
+### Funciones ###
 
-###### FUNCIONES PROGRAMA ######
-
-# espera antes de cada ejecucion de funcion para que no haya
-# perdida de datos
-def wait_screen():
+# Espera para evitar pérdida de datos o mal funcionamiento
+def wait():
     em.wait_for_field()
     time.sleep(DELAY)
 
-
+# Para proteger la ejecucuón de wait se efectos externos se utiliza dentro
+# de una inner function
 def waiter(func):
     def inner(*args, **kwargs):
-        wait_screen()
+        wait()
         res = func(*args, **kwargs)
         return res
 
     return inner
 
-
+# Conexión al mainframe a través del emulador
 def connect():
     address = HOST + ":" + PORT
     em.connect(address)
 
-
+# Desconexión del mainframe a través del emulador
 def disconnect():
     em.terminate()
 
-
+# Iniciar sesión en el mainframe
+# Posteriormente se realiza una espera para evitar pérdida de datos o un mal funcionamiento
 @waiter
 def login():
+    # Se completan los campos en la terminal rellenando los pixeles concretos
+    # y se pulsa enter
     em.fill_field(3, 18, USER, 8)
     em.fill_field(5, 18, PASSWD, 8)
     em.send_enter()
 
-
+# Ejecución en el mainframe del fichero tareas.c
+# Posteriormente se realiza una espera para evitar pérdida de datos o un mal funcionamiento
 @waiter
-def exec_task():
+def execProgram():
+    # Se completan los campos en la terminal rellenando los pixeles concretos
+    # y se pulsa enter
     em.fill_field(3, 15, 'tareas.c', 8)
     em.send_enter()
 
-
-@waiter
-def print_screen():
-    print('*~' * 40)
-    for i in range(SCREEN_HEIGTH):
-        print(em.string_get(i + 1, 1, SCREEN_WIDTH))
-    print('*~' * 40)
-
-
-def wait_compile():
+# Esperar a que el programa comience la ejecución
+def waitCompile():
+    # Se espera a que en la terminal aparezca en la parte inferior
+    # izquierda la palabra Reading, la cual indica que el programa
+    # está listo
     while em.string_get(43, 71, 7) != 'Reading':
         pass
 
-
+# Para poder capturar la salida en unas posiciones fijas de la pantalla,
+# se pulsa enter repetidas veces hasta que la pantalla de la terminal se llena,
+# apareciendo en la esquina inferior izquierda la palabra More...
+# Posteriormente se realiza una espera para evitar pérdida de datos o un mal funcionamiento
 @waiter
-def clean_screen():
+def clean():
     while em.string_get(43, 71, 7) != 'More...':
         em.send_enter()
-        wait_screen()
+        wait()
     em.send_enter()
 
-
-def pre_cleaner(func):
+# Para proteger la ejecucuón de clean se efectos externos se utiliza dentro
+# de una inner function
+def cleaner(func):
     def inner(*args, **kwargs):
-        clean_screen()
+        clean()
         res = func(*args, **kwargs)
         return res
 
     return inner
 
-
+# Introducir un parámetro en la terminal
+# Posteriormente se realiza una espera para evitar pérdida de datos
 @waiter
-def input_option(input):
+def inputParam(input):
+    # Se formatea input para obtener el valor de la variable
+    # y se pulsa enter
     em.send_string(f'{input}')
     em.send_enter()
 
+# Para simplificar el trabajo con una GUI nueva, cuando se finaliza una acción
+# se vuelve a mostrar el menú principal
+def backMenu(func):
+    def inner(*args, **kwargs):
+        res = func(*args, **kwargs)
+        inputParam(MAIN_MENU)
+        return res
 
+    return inner
+
+# Añadir una nueva tarea
+# Posteriormente se vuelve al menú principal y se limpia la pantalla
+@backMenu
+@cleaner
+def addT(taskType, day, month, description, name=None):
+    # Seleccionar añadir tarea
+    inputParam(ADD_TASK)
+    # Seleccionar tipo de tarea
+    inputParam(taskType)
+    # Adaptar el día y la fecha al formato requerido en la terminal
+    date = str(day).zfill(2) + str(month).zfill(2)
+    inputParam(date)
+    # Si es una tarea específica, se intorduce el nombre, por defecto el
+    # parámetro name tiene el valor none, en caso de ser una tarea específica
+    # contendrá otro valor
+    if taskType == TASK_SPECIFIC:
+        inputParam(name)
+    # Introducir la descripción
+    inputParam(description)
+
+# Listar las tareas en función del tipo
+# Posteriormente se vuelve al menú principal y se limpia la pantalla
+@backMenu
+@cleaner
+def listT(taskType):
+    taskList = []
+    # Seleccionar listar tareas
+    inputParam(VIEW_TASK)
+    # Seleccionar el tipo de tarea
+    inputParam(taskType)
+    wait()
+
+    # Si la pantalla ha sido limpiada la primera línea para leer
+    # será la 9, si no la 8
+    if em.string_get(1, 1, 1) == ' ':
+        firstLine = 9
+    else:
+        firstLine = 8
+
+    i = 1
+    line = em.string_get(firstLine, 1, SCREEN_WIDTH).strip()
+
+    # Mientras no se llegue al final del listado, comenzado por la
+    # palabra TOTAL
+    while line[0:5] != 'TOTAL':
+        # Si la línea comienza por la palabra TASK es una tarea
+        if line[0:4] == 'TASK':
+            taskList += [line]
+        line = em.string_get(firstLine + i, 1, SCREEN_WIDTH).strip()
+        i += 1
+
+    # Se compone la lista que se devolverá
+    taskListFinal = [
+        {
+            'id': param[1],
+            'type': param[2],
+            'date': param[3],
+            'name': param[4],
+            'desc': param[5]
+        }
+        for param in [line.split() for line in taskList]
+    ]
+
+    return taskListFinal
+
+# Proceso de inicialización desde la conexión con el mainframe hasta que
+# se puede empezar a utilizar el programa tareas.c
 def initialize():
     connect()
     em.send_enter()
     login()
     em.send_enter()
-    exec_task()
-    wait_compile()
-
-
-# Por simplicidad, cada vez que se termina una acción, se vuelve
-# al menú principal
-def back_on_finish(func):
-    def inner(*args, **kwargs):
-        res = func(*args, **kwargs)
-        input_option(MAIN_MENU)
-        return res
-
-    return inner
-
-
-@back_on_finish
-@pre_cleaner
-def add_task(task_type, day, month, description, name=None):
-    input_option(ADD_TASK)
-    input_option(task_type)
-    date = str(day).zfill(2) + str(month).zfill(2)
-    input_option(date)
-    if task_type == TASK_SPECIFIC:
-        input_option(name)
-    input_option(description)
-
-
-@back_on_finish
-@pre_cleaner
-def list_tasks(task_type):
-    task_list = []
-    input_option(VIEW_TASK)
-    input_option(task_type)
-    wait_screen()
-
-    if em.string_get(1, 1, 1) == ' ':
-        first_line = 9
-    else:
-        first_line = 8
-
-    i = 1
-    line = em.string_get(first_line, 1, SCREEN_WIDTH).strip()
-
-    while line[0:5] != 'TOTAL':
-        if line[0:4] == 'TASK':
-            task_list += [line]
-        else:
-            task_list[-1] += line
-        line = em.string_get(first_line + i, 1, SCREEN_WIDTH).strip()
-        i += 1
-
-    task_dict_list = [
-        {
-            'id': frags[1][:-1],
-            'type': frags[2],
-            'date': frags[3],
-            'name': frags[4],
-            'desc': frags[5]
-        }
-        for frags in [line.split() for line in task_list]
-    ]
-
-    return task_dict_list
-
-
-# Si se ejecuta el módulo directamente, prueba a insertar
-# y listar tareas
-if __name__ == "__main__":
-    print('Initializing...')
-    initialize()
-    print('Initialized')
-    add_task(TASK_GENERAL, 3, 10, 'Tarea1')
-    print('Task added')
-    add_task(TASK_GENERAL, 8, 11, 'Tarea2')
-    print('Task added')
-    add_task(TASK_GENERAL, 8, 11, 'Tarea3')
-    print('Task added')
-    add_task(TASK_GENERAL, 8, 11, 'Tarea4')
-    print('Task added')
-    add_task(TASK_GENERAL, 8, 11, 'Tarea5')
-    print('Task added')
-    add_task(TASK_SPECIFIC, 3, 10, 'TareaSpecific1', 'Nombre1')
-    print('Task added')
-    add_task(TASK_SPECIFIC, 3, 10, 'TareaSpecific2', 'Nombre2')
-    print('Task added')
-    add_task(TASK_SPECIFIC, 3, 10, 'TareaSpecific3', 'Nombre3')
-    print('Task added')
-    add_task(TASK_SPECIFIC, 3, 10, 'TareaSpecific4', 'Nombre4')
-    print('Tasks added')
-    g_tasks = list_tasks(TASK_GENERAL)
-    s_tasks = list_tasks(TASK_SPECIFIC)
-    print('Showing general tasks:')
-    for task in g_tasks:
-        print(task)
-    print('Showing specific tasks:')
-    for task in s_tasks:
-        print(task)
-    disconnect()
+    execProgram()
+    waitCompile()
