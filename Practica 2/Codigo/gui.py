@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 from tkinter import *
-from api import initialize, disconnect, addT, TASK_GENERAL, TASK_SPECIFIC, listT
+from api import initialize, disconnect, addT, listT, GENERAL_TASK, SPECIFIC_TASK
 
 root = Tk()
 root.config(width=300, height=200)
@@ -61,10 +61,10 @@ textLS.pack()
 # Campos a introducir para las nuevas tareas
 # Tipo de tarea
 taskType = IntVar()
-radioG = Radiobutton(frameType, text="General", variable=taskType, value=TASK_GENERAL, fg="green",
+radioG = Radiobutton(frameType, text="General", variable=taskType, value=GENERAL_TASK, fg="green",
                            font=("Verdana", 10))
 radioG.pack(anchor=W, side=LEFT)
-radioS = Radiobutton(frameType, text="Especifica", variable=taskType, value=TASK_SPECIFIC, fg="green",
+radioS = Radiobutton(frameType, text="Especifica", variable=taskType, value=SPECIFIC_TASK, fg="green",
                             font=("Verdana", 10))
 radioS.pack(anchor=W, side=RIGHT)
 # Día
@@ -121,8 +121,8 @@ def addTask():
     )
     textLG.delete(1.0, END)
     textLS.delete(1.0, END)
-    textLG.insert(INSERT, convertirLista(listT(TASK_GENERAL)))
-    textLS.insert(INSERT, convertirLista(listT(TASK_SPECIFIC)))
+    textLG.insert(INSERT, convertirLista(listT(GENERAL_TASK)))
+    textLS.insert(INSERT, convertirLista(listT(SPECIFIC_TASK)))
 
 # Botón para añadir la nueva tarea
 buttonTask = Button(frameTask, text="Anadir", fg="green", command=addTask)

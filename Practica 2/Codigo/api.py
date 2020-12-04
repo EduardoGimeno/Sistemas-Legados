@@ -19,8 +19,8 @@ SCREEN_HEIGTH = 43
 # Parámetros para controlar la lógica del programa
 ADD_TASK = 1
 VIEW_TASK = 2
-TASK_GENERAL = 1
-TASK_SPECIFIC = 2
+GENERAL_TASK = 1
+SPECIFIC_TASK = 2
 MAIN_MENU = 3
 
 # Declaración del emulador
@@ -28,13 +28,11 @@ em = Emulator(visible=True)
 
 ### Funciones ###
 
-# Espera para evitar pérdida de datos o mal funcionamiento
+# Espera para que la pantalla este lista
 def wait():
     em.wait_for_field()
     time.sleep(DELAY)
 
-# Para proteger la ejecucuón de wait se efectos externos se utiliza dentro
-# de una inner function
 def waiter(func):
     def inner(*args, **kwargs):
         wait()
@@ -53,7 +51,6 @@ def disconnect():
     em.terminate()
 
 # Iniciar sesión en el mainframe
-# Posteriormente se realiza una espera para evitar pérdida de datos o un mal funcionamiento
 @waiter
 def login():
     # Se completan los campos en la terminal rellenando los pixeles concretos
@@ -63,7 +60,6 @@ def login():
     em.send_enter()
 
 # Ejecución en el mainframe del fichero tareas.c
-# Posteriormente se realiza una espera para evitar pérdida de datos o un mal funcionamiento
 @waiter
 def execProgram():
     # Se completan los campos en la terminal rellenando los pixeles concretos
@@ -82,7 +78,6 @@ def waitCompile():
 # Para poder capturar la salida en unas posiciones fijas de la pantalla,
 # se pulsa enter repetidas veces hasta que la pantalla de la terminal se llena,
 # apareciendo en la esquina inferior izquierda la palabra More...
-# Posteriormente se realiza una espera para evitar pérdida de datos o un mal funcionamiento
 @waiter
 def clean():
     while em.string_get(43, 71, 7) != 'More...':
@@ -90,8 +85,6 @@ def clean():
         wait()
     em.send_enter()
 
-# Para proteger la ejecucuón de clean se efectos externos se utiliza dentro
-# de una inner function
 def cleaner(func):
     def inner(*args, **kwargs):
         clean()
@@ -101,7 +94,6 @@ def cleaner(func):
     return inner
 
 # Introducir un parámetro en la terminal
-# Posteriormente se realiza una espera para evitar pérdida de datos
 @waiter
 def inputParam(input):
     # Se formatea input para obtener el valor de la variable
@@ -120,7 +112,6 @@ def backMenu(func):
     return inner
 
 # Añadir una nueva tarea
-# Posteriormente se vuelve al menú principal y se limpia la pantalla
 @backMenu
 @cleaner
 def addT(taskType, day, month, description, name=None):
@@ -134,13 +125,12 @@ def addT(taskType, day, month, description, name=None):
     # Si es una tarea específica, se intorduce el nombre, por defecto el
     # parámetro name tiene el valor none, en caso de ser una tarea específica
     # contendrá otro valor
-    if taskType == TASK_SPECIFIC:
+    if taskType == SPECIFIC_TASK:
         inputParam(name)
     # Introducir la descripción
     inputParam(description)
 
 # Listar las tareas en función del tipo
-# Posteriormente se vuelve al menú principal y se limpia la pantalla
 @backMenu
 @cleaner
 def listT(taskType):
